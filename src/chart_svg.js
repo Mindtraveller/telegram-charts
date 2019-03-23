@@ -364,7 +364,8 @@ function createChart(data) {
     }
 
     function toXLabel(timestamp) {
-        return (new Date(timestamp)).toString().slice(4, 10);
+        const label = (new Date(timestamp)).toString().slice(4, 10);
+        return label[4] === '0' ? `${label.slice(0, 4)}${label[5]}` : label; // remove leading zeros
     }
 
     function getMax(data) {
