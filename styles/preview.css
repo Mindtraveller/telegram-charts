@@ -9,7 +9,6 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 100%;
     display: flex;
 }
 
@@ -19,11 +18,11 @@
     opacity: 0.3;
 }
 
-.shadow.left {
+.left {
     left: 0;
 }
 
-.shadow.right {
+.right {
     right: 0;
 }
 
@@ -40,8 +39,4 @@
     height: 100%;
     background: #aeb7bd;
     opacity: 0.5;
-}
-
-.slider__bar.right {
-    right: 0;
 }

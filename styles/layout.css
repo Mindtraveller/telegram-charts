@@ -1,9 +1,9 @@
 body {
     margin: 0;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Helvetica Neue", sans-serif;
 }
 
-body h1 {
+h1 {
     font-size: 24px;
     margin: 0 10px 30px;
 }
@@ -14,50 +14,50 @@ button {
     outline: none;
 }
 
-body.dark-mode {
+.dark {
     background: #242f3f;
 }
 
-body.dark-mode h1 {
+.dark h1 {
     color: white;
 }
 
-body.dark-mode text,
-body.dark-mode line {
+.dark text,
+.dark line {
     fill: #546778;
 }
 
-body.dark-mode circle {
+.dark circle {
     fill: #242f3f;
 }
 
-body.dark-mode .shadow {
+.dark .shadow {
     background: #1f2a38;
     opacity: 0.7;
 }
 
-body.dark-mode .slider {
+.dark .slider {
     border-color: #40566b;
 }
 
-body.dark-mode .slider__bar {
+.dark .slider__bar {
     background: #384e63;
 }
 
-body.dark-mode .buttons > button > span {
+.dark .buttons > button > span {
     color: #e2e6e8;
 }
 
-body.dark-mode .buttons > button {
+.dark .buttons > button {
     border-color: #334659;
 }
 
-body.dark-mode .point-info {
+.dark .point-info {
     background: #253242;
     border-color: #202b39;
 }
 
-body.dark-mode .point-info > div:first-child {
+.dark .point-info > div:first-child {
     color: white;
 }
 
@@ -74,7 +74,7 @@ body.dark-mode .point-info > div:first-child {
     overflow: hidden;
 }
 
-.charts-container > .chart-wrapper > .buttons {
+.buttons {
     margin-top: 10px;
 }
 

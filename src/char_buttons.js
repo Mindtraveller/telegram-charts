@@ -9,7 +9,7 @@ function createButtons(chartData, chartRootElement) {
 
     Object.keys(chartData.names).forEach(chart => {
         const button = el('button');
-        const icon = svgEl('svg', { width: '24', height: '24', viewBox: '0 0 24 24' });
+        const icon = svgEl('svg', { width: '20', height: '20', viewBox: '0 0 24 24' });
         icon.style.borderColor = chartData.colors[chart];
         icon.style.background = chartData.colors[chart];
         const iconPath = svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' });

@@ -15,8 +15,6 @@
     border-radius: 100%;
     border: solid 2px;
     pointer-events: none;
-    width: 20px;
-    height: 20px;
     padding: 2px;
     transition: background 250ms;
 }

@@ -8,7 +8,7 @@
     button.innerText = LIGHT_LABEL;
 
     function handleModeSwitch() {
-        document.body.classList.toggle('dark-mode');
+        document.body.classList.toggle('dark');
         isDark = !isDark;
         button.innerText = isDark ? DARK_LABEL : LIGHT_LABEL;
     }

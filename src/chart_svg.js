@@ -1,10 +1,8 @@
 function createChart(data) {
     const chartsContainer = document.getElementById('charts-container');
     const MAX_CHART_WIDTH = 500;
-    const CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth);
+    const CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth); // same width for preview as well
     const CHART_HEIGHT = 400;
-
-    const PREVIEW_WIDTH = Math.min(500, window.innerWidth);
     const PREVIEW_HEIGHT = 50;
 
     const X_AXIS_PADDING = 20;
@@ -52,7 +50,7 @@ function createChart(data) {
     let columnsToShow = chartData.columns.filter(column => visibilityMap[column[0]]);
 
     let xCoordinates = buildXCoordinates();
-    let xPreviewCoordinates = normalize(x, PREVIEW_WIDTH);
+    let xPreviewCoordinates = normalize(x, CHART_WIDTH);
 
     let newYMax = calculateLocalYMax(columnsToShow);
     let newPreviewYMax = calculateYMax(columnsToShow);
@@ -151,6 +149,8 @@ function createChart(data) {
         const _ = yAxesGroupHidden;
         yAxesGroupHidden = yAxesGroupShown;
         yAxesGroupShown = _;
+
+        // proper position will be set without transition time
         setTimeout(() => {
             removeClass(yAxesGroupShown, 'hidden', 'pending');
             removeClass(yAxesGroupHidden, 'pending');
@@ -274,8 +274,7 @@ function createChart(data) {
     }
 
     function createChartLines() {
-        columnsToShow.forEach(column => {
-            const lineName = column[0];
+        eachColumn(columnsToShow, (column, lineName) => {
             const color = chartData.colors[lineName];
             const chartLine = createChartLine(color, 2.5);
             const previewLine = createChartLine(color, 1.5);
@@ -296,8 +295,7 @@ function createChart(data) {
     }
 
     function displayData(updatePreview = false) {
-        columnsToShow.forEach(column => {
-            const lineName = column[0];
+        eachColumn(columnsToShow, (column, lineName) => {
             const data = column.slice(1);
             normalizeAndDisplay(chartData.lines[lineName], data);
             updatePreview && normalizeAndDisplayPreview(chartData.lines[lineName], data);
@@ -307,8 +305,7 @@ function createChart(data) {
     function animateUpdate() {
         const isAdding = newColumnsToShow.length > columnsToShow.length;
         const columnsToUse = isAdding ? newColumnsToShow : columnsToShow;
-        columnsToUse.forEach(column => {
-            const columnName = column[0];
+        eachColumn(columnsToUse, (column, columnName) => {
             const data = column.slice(1);
             const alpha = newVisibilityMap[columnName] ? 1 : 0;
             normalizeAndDisplay(chartData.lines[columnName], data, alpha);
@@ -361,7 +358,7 @@ function createChart(data) {
 
     function calculateZoom(start, end = x.length) {
         const partShown = Math.round(10 * (end - start) / x.length);
-        return Math.round(Math.log2(partShown))
+        return Math.round(Math.log2(partShown)); // first time I used log in JS :)
     }
 
     function getLabelsStep() {
@@ -382,12 +379,16 @@ function createChart(data) {
         return label[4] === '0' ? `${label.slice(0, 4)}${label[5]}` : label; // remove leading zeros
     }
 
+    function eachColumn(columns, callback) {
+        columns.forEach(column => callback(column, column[0]));
+    }
+
     function getMax(data) {
         return Math.max(...data);
     }
 
     function createAnimate(attributeName = 'points') {
-        return svgEl('animate', { attributeName, repeatCount: 1, dur: '250ms', fill: 'freeze' });
+        return svgEl('animate', { attributeName, repeatCount: 1, dur: '250ms', fill: 'freeze', from: 0, to: 0 });
     }
 
     function createChartLine(color, width) {
@@ -423,7 +424,7 @@ function createChart(data) {
 
     function createPreview() {
         const container = addClass(el('div'), 'preview-container');
-        const svg = svgEl('svg', { viewBox: `0 0 ${PREVIEW_WIDTH} ${PREVIEW_HEIGHT}` });
+        const svg = svgEl('svg', { viewBox: `0 0 ${CHART_WIDTH} ${PREVIEW_HEIGHT}` });
         add(container, svg);
         add(container, createSlider(chartData, chartRootElement));
         return { previewContainer: container, preview: svg };

@@ -15,7 +15,7 @@
     text-align: center;
 }
 
-.point-info .charts-info {
+.charts-info {
     display: flex;
     justify-content: space-evenly;
     flex-wrap: wrap;
@@ -23,13 +23,13 @@
     text-align: center;
 }
 
-.charts-info > .info {
+.info {
     display: flex;
     flex-direction: column;
     font-weight: 300;
     padding: 0 5px;
 }
 
-.charts-info > .info > span {
+.info > span {
     font-weight: bold;
 }

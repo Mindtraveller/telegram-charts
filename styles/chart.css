@@ -27,52 +27,46 @@ g.pending {
     transition: 0s;
 }
 
-g.x-axes {
-    transition: 0.5s;
+.x-axes {
     transform: scale(1, 1) translate(0, 100%);
 }
 
-g.x-axes > text {
+.x-axes > text {
+    transition: .5s;
     text-anchor: middle;
 }
 
-g.x-axes.hidden > text {
-    transition: 250ms;
+.x-axes.hidden > text {
     transform: translateX(2%);
 }
 
-g.x-axes.hidden.right > text {
-    transition: 250ms;
+.x-axes.hidden.right > text {
     transform: translateX(-2%);
 }
 
-g.x-axes.hidden > text:nth-child(odd) {
+.x-axes.hidden > text:nth-child(odd) {
     display: none;
 }
 
-g.y-axes.hidden.m-up {
+.y-axes.hidden.m-up {
     transform: scale(1, 0.5) translate(0, -100%);
 }
 
-g.y-axes.hidden.m-down {
+.y-axes.hidden.m-down {
     transform: scale(1, 0.5) translate(0, 100%);
 }
 
-g.y-axes {
+.y-axes {
     transform: scale(1, 1) translateY(-20%);
 }
 
-g.y-axes > text {
+.y-axes > text {
     transform: translateY(3%);
 }
 
 /** zero axes */
 svg > g:first-of-type > text {
     transform: scale(1, -1) translate(0, -1%);
-}
-
-.chart-wrapper > circle {
-    position: absolute;
 }
 
 @keyframes enter {
