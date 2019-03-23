@@ -1,4 +1,4 @@
-.point-info-container {
+.point-info {
     position: absolute;
     top: 30px;
     background: white;
@@ -9,13 +9,13 @@
     display: none;
 }
 
-.point-info-container > div:first-child {
+.point-info > div:first-child {
     margin-bottom: 10px;
     font-weight: 400;
     text-align: center;
 }
 
-.point-info-container .point-info__chart-info-container {
+.point-info .charts-info {
     display: flex;
     justify-content: space-evenly;
     flex-wrap: wrap;
@@ -23,13 +23,13 @@
     text-align: center;
 }
 
-.point-info__chart-info-container > .point-info__chart-info {
+.charts-info > .info {
     display: flex;
     flex-direction: column;
     font-weight: 300;
     padding: 0 5px;
 }
 
-.point-info__chart-info-container > .point-info__chart-info > span {
+.charts-info > .info > span {
     font-weight: bold;
 }

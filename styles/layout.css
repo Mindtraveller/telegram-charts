@@ -52,12 +52,12 @@ body.dark-mode .buttons > button {
     border-color: #334659;
 }
 
-body.dark-mode .point-info-container {
+body.dark-mode .point-info {
     background: #253242;
     border-color: #202b39;
 }
 
-body.dark-mode .point-info-container > div:first-child {
+body.dark-mode .point-info > div:first-child {
     color: white;
 }
 

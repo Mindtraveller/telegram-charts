@@ -431,16 +431,16 @@ function createChart(data) {
 
     function createSelectedPointInfo() {
         const info = el('div');
-        addClass(info, 'point-info-container');
+        addClass(info, 'point-info');
         const chartInfoContainer = el('div');
-        addClass(chartInfoContainer, 'point-info__chart-info-container');
+        addClass(chartInfoContainer, 'charts-info');
         const date = el('div');
         add(info, date);
         add(info, chartInfoContainer);
         const chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
             const div = el('div');
             div.style.color = chartData.colors[chart];
-            addClass(div, 'point-info__chart-info');
+            addClass(div, 'info');
             const value = el('span');
             add(div, value);
             acc[chart] = value;
