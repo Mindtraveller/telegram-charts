@@ -1,5 +1,5 @@
 function createButtons(chartData, chartRootElement) {
-    let buttons = addClass(el('div'), 'buttons');
+    let buttons = el('div', 'buttons');
     on(buttons, 'click', handleButtonClick);
 
     let visibilityMap = Object.keys(chartData.names).reduce((acc, chartName) => ({
@@ -12,12 +12,10 @@ function createButtons(chartData, chartRootElement) {
         let icon = svgEl('svg', { width: '20', height: '20', viewBox: '0 0 24 24' });
         icon.style.borderColor = chartData.colors[chart];
         icon.style.background = chartData.colors[chart];
-        let iconPath = svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' });
-        add(icon, iconPath);
-        add(button, icon);
+        add(icon, svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' }));
         let span = el('span');
         add(span, t(chartData.names[chart]));
-        add(button, span);
+        add(button, icon, span);
         button.dataset.chart = chart;
         add(buttons, button);
     });

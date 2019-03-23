@@ -1,17 +1,17 @@
 let d = document;
 
-function el(elementName) {
-    return d.createElement(elementName);
+function el(elementName, ...classNames) {
+    return addClass(d.createElement(elementName), ...classNames);
 }
 
 function t(text) {
     return d.createTextNode(text);
 }
 
-function svgEl(elementName, attributes) {
+function svgEl(elementName, attributes, ...classNames) {
     let element = d.createElementNS('http://www.w3.org/2000/svg', elementName);
     svgAttrs(element, attributes);
-    return element;
+    return addClass(element, ...classNames);
 }
 
 function svgAttrs(element, attributes = {}) {
@@ -29,8 +29,8 @@ function removeClass(element, ...className) {
     element.classList.remove(...className);
 }
 
-function add(parent, child) {
-    parent.appendChild(child);
+function add(parent, ...children) {
+    children.forEach(child => parent.appendChild(child));
 }
 
 function on(element, eventName, callback) {

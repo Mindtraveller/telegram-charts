@@ -3,8 +3,8 @@ function createSlider(chart, containerElement) {
 
     let x = chart.columns[0].slice(1);
     let { slider, leftBar, rightBar } = createSlider();
-    let leftShadow = addClass(el('div'), 'shadow', 'left');
-    let rightShadow = addClass(el('div'), 'shadow', 'right');
+    let leftShadow = el('div', 'shadow', 'left');
+    let rightShadow = el('div', 'shadow', 'right');
 
     on(containerElement, 'mousedown', handleTouchStart);
     on(containerElement, 'touchstart', handleTouchStart);
@@ -126,17 +126,14 @@ function createSlider(chart, containerElement) {
     }
 
     function createSlider() {
-        let slider = addClass(el('div'), 'slider');
-        let leftBar = addClass(el('div'), 'slider__bar');
-        let rightBar = addClass(el('div'), 'slider__bar', 'right');
-        add(slider, leftBar);
-        add(slider, rightBar);
+        let slider = el('div', 'slider');
+        let leftBar = el('div', 'slider__bar');
+        let rightBar = el('div', 'slider__bar', 'right');
+        add(slider, leftBar, rightBar);
         return { slider, leftBar, rightBar };
     }
 
-    let sliderContainer = addClass(el('div'), 'slider-container');
-    add(sliderContainer, leftShadow);
-    add(sliderContainer, slider);
-    add(sliderContainer, rightShadow);
+    let sliderContainer = el('div', 'slider-container');
+    add(sliderContainer, leftShadow, slider, rightShadow);
     return sliderContainer;
 }

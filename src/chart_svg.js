@@ -4,6 +4,8 @@ function createChart(data) {
     let CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth); // same width for preview as well
     let CHART_HEIGHT = 400;
     let PREVIEW_HEIGHT = 50;
+    let CHART_LINE_WEIGHT = 2.5
+    let PREVIEW_LINE_WEIGHT = 1.5
 
     let X_AXIS_PADDING = 20;
 
@@ -22,23 +24,16 @@ function createChart(data) {
 
     let X_LABELS_STEP = Math.round(x.length / ZOOM_STEP / X_LABELS_MAX_NUMBER);
 
-    let chartRootElement = addClass(el('div'), 'chart-wrapper');
-    let chart = createChart();
+    let chartRootElement = el('div', 'chart-wrapper');
+    let chart = createChartElement();
     let { preview, previewContainer } = createPreview();
     let { buttons, visibilityMap } = createButtons(chartData, chartRootElement);
     let { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo();
     let { xAxes, xAxesHidden } = createXAxes();
+    let { yAxesGroupShown, yAxesGroupHidden } = createYAxes();
 
-    add(chart, xAxes);
-    add(chart, xAxesHidden);
-    add(chartRootElement, chart);
-    add(chartRootElement, previewContainer);
-    add(chartRootElement, buttons);
-    add(chartRootElement, selectedPointInfo);
-    add(chartsContainer, chartRootElement);
-
-    let yAxesGroupShown;
-    let yAxesGroupHidden;
+    add(chart, createZeroYAxis(), yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden);
+    add(chartRootElement, chart, previewContainer, buttons, selectedPointInfo);
 
     let start = 0;
     let end = undefined;
@@ -47,21 +42,21 @@ function createChart(data) {
 
     let yMax = 0;
     let previewYMax = 0;
+    // TODO: change structure to { name, data } to get rid of extra slices
     let columnsToShow = chartData.columns.filter(column => visibilityMap[column[0]]);
 
     let xCoordinates = buildXCoordinates();
     let xPreviewCoordinates = normalize(x, CHART_WIDTH);
 
-    let newYMax = calculateLocalYMax(columnsToShow);
-    let newPreviewYMax = calculateYMax(columnsToShow);
-    let newVisibilityMap;
-    let newColumnsToShow;
+    let newYMax = calculateYMax(columnsToShow);
+    let newPreviewYMax = calculatePreviewYMax(columnsToShow);
 
     let zoom = calculateZoom(start, end);
     let xLabels = buildXLabels();
 
     createChartLines();
-    createYAxesGroup();
+    add(chartsContainer, chartRootElement);
+
     displayData(true);
     displayYAxes();
 
@@ -69,16 +64,23 @@ function createChart(data) {
     previewYMax = newPreviewYMax;
 
     on(chartRootElement, 'visibility-updated', ({ detail: newMap }) => {
-        newVisibilityMap = newMap;
-        newColumnsToShow = chartData.columns.filter(column => newVisibilityMap[column[0]]);
+        visibilityMap = newMap;
+        let newColumnsToShow = chartData.columns.filter(column => visibilityMap[column[0]]);
 
-        newYMax = calculateLocalYMax(newColumnsToShow);
-        newPreviewYMax = calculateYMax(newColumnsToShow);
+        newYMax = calculateYMax(newColumnsToShow);
+        newPreviewYMax = calculatePreviewYMax(newColumnsToShow);
 
-        animateUpdate();
+        let isAdding = newColumnsToShow.length > columnsToShow.length;
+        let columnsToUse = isAdding ? newColumnsToShow : columnsToShow;
+        eachColumn(columnsToUse, (column, columnName) => {
+            let data = column.slice(1);
+            let alpha = visibilityMap[columnName] ? 1 : 0;
+            normalizeAndDisplay(chartData.lines[columnName], data, alpha);
+            normalizeAndDisplayPreview(chartData.lines[columnName], data, alpha);
+        });
+
         displayYAxes();
 
-        visibilityMap = newVisibilityMap;
         yMax = newYMax;
         previewYMax = newPreviewYMax;
         columnsToShow = newColumnsToShow;
@@ -100,7 +102,7 @@ function createChart(data) {
         end = newEnd;
         xCoordinates = buildXCoordinates();
 
-        newYMax = calculateLocalYMax(columnsToShow);
+        newYMax = calculateYMax(columnsToShow);
         displayData();
         displayYAxes();
         displayXAxes();
@@ -111,9 +113,8 @@ function createChart(data) {
     });
 
     on(chart, 'click', event => {
-        let touchPoint = event.offsetX;
         let step = xCoordinates[1] / 2;
-        let newIndex = start + Math.max(0, xCoordinates.findIndex(xCoordinate => xCoordinate + step > touchPoint));
+        let newIndex = start + Math.max(0, xCoordinates.findIndex(xCoordinate => xCoordinate + step > event.offsetX));
         if (newIndex !== selectedXIndex) {
             selectedXIndex = newIndex;
             displaySelectedPoint();
@@ -134,14 +135,15 @@ function createChart(data) {
 
         let axisStep = Math.ceil(newYMax * Y_AXES_PERCENT_CALCULATION / (NUMBER_Y_AXES - 1));
         let axes = Array.apply(null, Array(NUMBER_Y_AXES - 1)).map((_, i) => (i + 1) * axisStep);
-        let normalizedAxes = customNormalize(axes, getMax(axes), CHART_HEIGHT * Y_AXES_PERCENT_CALCULATION);
+        let normalizedAxes = customNormalize(axes, getMax(axes), CHART_HEIGHT * Y_AXES_PERCENT_CALCULATION, X_AXIS_PADDING);
         clearChildren(yAxesGroupHidden);
+
         normalizedAxes.forEach((y, i) => {
-            let line = createAxisLine(10, CHART_WIDTH - 10, y + X_AXIS_PADDING, y + X_AXIS_PADDING);
-            let text = createSVGText(axes[axes.length - i - 1], 5, y);
-            add(yAxesGroupHidden, line);
-            add(yAxesGroupHidden, text);
+            let line = createAxisLine(10, CHART_WIDTH - 10, y, y);
+            let text = createSVGText(axes[axes.length - i - 1], 5, y - 5 /** place text a bit above the line */);
+            add(yAxesGroupHidden, line, text);
         });
+
         removeClass(yAxesGroupHidden, 'm-down', 'm-up');
         removeClass(yAxesGroupShown, 'm-down', 'm-up');
         addClass(yAxesGroupHidden, newYMax > yMax ? 'm-up' : 'm-down', 'pending');
@@ -150,7 +152,7 @@ function createChart(data) {
         yAxesGroupHidden = yAxesGroupShown;
         yAxesGroupShown = _;
 
-        // proper position will be set without transition time
+        // proper position will be set without animation and only then animation will start
         setTimeout(() => {
             removeClass(yAxesGroupShown, 'hidden', 'pending');
             removeClass(yAxesGroupHidden, 'pending');
@@ -201,29 +203,30 @@ function createChart(data) {
 
         if (selectedXIndex === -1) {
             selectedPointInfo.style.display = 'none';
-            chartData.columns.forEach(column => {
-                let lineName = column[0];
+            eachColumn(chartData.columns, (column, lineName) => {
                 let point = chartData.lines[lineName].chartPoint;
                 point.style.animationName = 'exit';
             })
             return;
         }
 
-        let xValue = x[selectedXIndex];
-        let pointCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end - 1] - x[start]);
-        selectedLine = createAxisLine(pointCoordinate, pointCoordinate, X_AXIS_PADDING, X_AXIS_PADDING + CHART_HEIGHT);
+        // TODO: hide points when selected index is outside of window
 
-        chartData.columns.forEach(column => {
-            let lineName = column[0];
+        let xValue = x[selectedXIndex];
+        let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end - 1] - x[start]);
+        selectedLine = createAxisLine(xCoordinate, xCoordinate, X_AXIS_PADDING, X_AXIS_PADDING + CHART_HEIGHT);
+
+        eachColumn(chartData.columns, (column, lineName) => {
             let data = column.slice(1);
+            // TODO: get rid of normalization
             let normalized = customNormalize(data, yMax, CHART_HEIGHT, X_AXIS_PADDING);
-            let point = chartData.lines[lineName].chartPoint
+            let point = chartData.lines[lineName].chartPoint;
             point.style.animationName = visibilityMap[lineName] ? 'enter' : 'exit';
-            svgAttrs(point, { cx: pointCoordinate })
+            svgAttrs(point, { cx: xCoordinate });
             let animate = point.firstChild;
             svgAttrs(animate, {
                 from: animate.getAttribute('to'),
-                to: normalized[selectedXIndex]
+                to: normalized[selectedXIndex],
             });
             animate.beginElement();
 
@@ -231,67 +234,20 @@ function createChart(data) {
             pointChartValues[lineName].parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none';
         });
 
-        chart.insertBefore(selectedLine, chart.firstChild);
+        chart.insertBefore(selectedLine, chart.firstChild); // to be behind another items
         pointDate.innerText = new Date(xValue).toString().slice(0, 10);
-        let fromRight = pointCoordinate > CHART_WIDTH / 2;
-        selectedPointInfo.style[fromRight ? 'right' : 'left'] = `${fromRight ? CHART_WIDTH - pointCoordinate : pointCoordinate}px`;
+        let fromRight = xCoordinate > CHART_WIDTH / 2;
+        selectedPointInfo.style[fromRight ? 'right' : 'left'] = `${fromRight ? CHART_WIDTH - xCoordinate : xCoordinate}px`;
         selectedPointInfo.style[fromRight ? 'left' : 'right'] = null;
         selectedPointInfo.style.display = 'block';
     }
 
+    function calculatePreviewYMax(columns) {
+        return getMax(columns.reduce((acc, column) => acc.concat(column.slice(1)), []));
+    }
+
     function calculateYMax(columns) {
-        let previewValues = columns.reduce((acc, column) => acc.concat(column.slice(1)), []);
-        return getMax(previewValues);
-    }
-
-    function calculateLocalYMax(columns) {
-        let values = columns.reduce((acc, column) => acc.concat(column.slice(1 + start, end ? 1 + end : undefined)), []);
-        return getMax(values);
-    }
-
-    function createYAxesGroup() {
-        let g1 = svgEl('g');
-        let g2 = svgEl('g');
-        addClass(g1, 'y-axes');
-        addClass(g2, 'y-axes', 'hidden');
-        chart.insertBefore(g1, chart.firstChild);
-        chart.insertBefore(g2, chart.firstChild);
-        // zero axes is not animatable
-        chart.insertBefore(crateZeroAxisLine(), chart.firstChild);
-        yAxesGroupShown = g1;
-        yAxesGroupHidden = g2;
-    }
-
-    function createXAxes() {
-        let xAxes = svgEl('g');
-        addClass(xAxes, 'x-axes');
-        let xAxesHidden = svgEl('g');
-        addClass(xAxesHidden, 'x-axes', 'hidden');
-        return {
-            xAxes,
-            xAxesHidden
-        };
-    }
-
-    function createChartLines() {
-        eachColumn(columnsToShow, (column, lineName) => {
-            let color = chartData.colors[lineName];
-            let chartLine = createChartLine(color, 2.5);
-            let previewLine = createChartLine(color, 1.5);
-            let chartPoint = createChartPoint(color);
-            chartPoint.style.animationName = 'exit';
-            chartData.lines[lineName] = {
-                chart: chartLine,
-                preview: previewLine,
-                chartPoint,
-            };
-            add(chartLine, createAnimate());
-            add(previewLine, createAnimate());
-            add(chartPoint, createAnimate('cy'));
-            add(chart, chartLine);
-            add(chart, chartPoint);
-            add(preview, previewLine);
-        });
+        return getMax(columns.reduce((acc, column) => acc.concat(column.slice(1 + start, end ? 1 + end : undefined)), []));
     }
 
     function displayData(updatePreview = false) {
@@ -299,17 +255,6 @@ function createChart(data) {
             let data = column.slice(1);
             normalizeAndDisplay(chartData.lines[lineName], data);
             updatePreview && normalizeAndDisplayPreview(chartData.lines[lineName], data);
-        });
-    }
-
-    function animateUpdate() {
-        let isAdding = newColumnsToShow.length > columnsToShow.length;
-        let columnsToUse = isAdding ? newColumnsToShow : columnsToShow;
-        eachColumn(columnsToUse, (column, columnName) => {
-            let data = column.slice(1);
-            let alpha = newVisibilityMap[columnName] ? 1 : 0;
-            normalizeAndDisplay(chartData.lines[columnName], data, alpha);
-            normalizeAndDisplayPreview(chartData.lines[columnName], data, alpha);
         });
     }
 
@@ -387,6 +332,34 @@ function createChart(data) {
         return Math.max(...data);
     }
 
+    function createYAxes() {
+        return { yAxesGroupShown: svgEl('g', {}, 'y-axes'), yAxesGroupHidden: svgEl('g', {}, 'y-axes', 'hidden') };
+    }
+
+    function createXAxes() {
+        return { xAxes: svgEl('g', {}, 'x-axes'), xAxesHidden: svgEl('g', {}, 'x-axes', 'hidden') };
+    }
+
+    function createChartLines() {
+        eachColumn(columnsToShow, (column, lineName) => {
+            let color = chartData.colors[lineName];
+            let chartLine = createChartLine(color, CHART_LINE_WEIGHT);
+            let previewLine = createChartLine(color, PREVIEW_LINE_WEIGHT);
+            let chartPoint = createChartPoint(color);
+            chartPoint.style.animationName = 'exit';
+            chartData.lines[lineName] = {
+                chart: chartLine,
+                preview: previewLine,
+                chartPoint,
+            };
+            add(chartLine, createAnimate());
+            add(previewLine, createAnimate());
+            add(chartPoint, createAnimate('cy'));
+            add(chart, chartLine, chartPoint);
+            add(preview, previewLine);
+        });
+    }
+
     function createAnimate(attributeName = 'points') {
         return svgEl('animate', { attributeName, repeatCount: 1, dur: '250ms', fill: 'freeze', from: 0, to: 0 });
     }
@@ -396,15 +369,12 @@ function createChart(data) {
     }
 
     function createChartPoint(color) {
-        return svgEl('circle', { r: 6, fill: 'white', 'stroke': color, 'stroke-width': 2.5 });
+        return svgEl('circle', { r: 6, fill: 'white', 'stroke': color, 'stroke-width': CHART_LINE_WEIGHT });
     }
 
-    function crateZeroAxisLine() {
+    function createZeroYAxis() {
         let group = svgEl('g');
-        let line = createAxisLine(10, CHART_WIDTH - 10, X_AXIS_PADDING, X_AXIS_PADDING);
-        let text = createSVGText('0', 5, -X_AXIS_PADDING);
-        add(group, line);
-        add(group, text);
+        add(group, createAxisLine(10, CHART_WIDTH - 10, X_AXIS_PADDING, X_AXIS_PADDING), createSVGText('0', 5, -X_AXIS_PADDING));
         return group;
     }
 
@@ -418,42 +388,32 @@ function createChart(data) {
         return t;
     }
 
-    function createChart() {
+    function createChartElement() {
         return svgEl('svg', { viewBox: `0 0 ${CHART_WIDTH} ${CHART_HEIGHT + X_AXIS_PADDING}` });
     }
 
     function createPreview() {
-        let container = addClass(el('div'), 'preview-container');
+        let container = el('div', 'preview-container');
         let svg = svgEl('svg', { viewBox: `0 0 ${CHART_WIDTH} ${PREVIEW_HEIGHT}` });
-        add(container, svg);
-        add(container, createSlider(chartData, chartRootElement));
+        add(container, svg, createSlider(chartData, chartRootElement));
         return { previewContainer: container, preview: svg };
     }
 
     function createSelectedPointInfo() {
-        let info = el('div');
-        addClass(info, 'point-info');
-        let chartInfoContainer = el('div');
-        addClass(chartInfoContainer, 'charts-info');
+        let info = el('div', 'point-info');
+        let chartInfoContainer = el('div', 'charts-info');
         let date = el('div');
-        add(info, date);
-        add(info, chartInfoContainer);
+        add(info, date, chartInfoContainer);
         let chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
-            let div = el('div');
+            let div = el('div', 'info');
             div.style.color = chartData.colors[chart];
-            addClass(div, 'info');
             let value = el('span');
-            add(div, value);
             acc[chart] = value;
-            add(div, t(chartName));
+            add(div, value, t(chartName));
             add(chartInfoContainer, div);
             return acc;
-        }, {})
+        }, {});
 
-        return {
-            selectedPointInfo: info,
-            pointChartValues: chartValues,
-            pointDate: date,
-        };
+        return { selectedPointInfo: info, pointChartValues: chartValues, pointDate: date };
     }
 }
