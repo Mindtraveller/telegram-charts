@@ -1,6 +1,7 @@
 function createChart(data) {
     const chartsContainer = document.getElementById('charts-container');
-    const CHART_WIDTH = Math.min(500, window.innerWidth);
+    const MAX_CHART_WIDTH = 500;
+    const CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth);
     const CHART_HEIGHT = 400;
 
     const PREVIEW_WIDTH = Math.min(500, window.innerWidth);
@@ -11,7 +12,7 @@ function createChart(data) {
     const NUMBER_Y_AXES = 5;
     const Y_AXES_PERCENT_CALCULATION = 0.95; // this allows axes to be positioned a bit bellow the top border of chart
 
-    const POINTS_PER_ZOOM = 10 * CHART_WIDTH / 500;
+    const ZOOM_STEP = 10 * CHART_WIDTH / MAX_CHART_WIDTH;
     const X_LABELS_MAX_NUMBER = 6; // desired number, not concrete one :)
 
     const x = data.columns[0].slice(1);
@@ -21,7 +22,7 @@ function createChart(data) {
         lines: {},
     };
 
-    const X_LABELS_STEP = Math.round(x.length / POINTS_PER_ZOOM / X_LABELS_MAX_NUMBER);
+    const X_LABELS_STEP = Math.round(x.length / ZOOM_STEP / X_LABELS_MAX_NUMBER);
 
     const chartRootElement = createChartRootElement();
     const chart = createChart();
@@ -99,14 +100,15 @@ function createChart(data) {
 
         start = newStart;
         end = newEnd;
-        newYMax = calculateLocalYMax(columnsToShow);
         xCoordinates = buildXCoordinates();
 
+        newYMax = calculateLocalYMax(columnsToShow);
         displayData();
         displayYAxes();
         displayXAxes();
 
         yMax = newYMax;
+
         displaySelectedPoint();
     });
 
@@ -169,11 +171,19 @@ function createChart(data) {
         const endMoved = oldEnd !== newEnd;
         const startMovedLeft = oldStart > newStart;
         const endMovedLeft = oldEnd > newEnd;
-        addClass(xAxes, 'hidden');
-        removeClass(xAxesHidden, 'hidden');
+
         const _ = xAxes;
         xAxes = xAxesHidden;
         xAxesHidden = _;
+
+        addClass(xAxes, 'pending');
+        removeClass(xAxes, 'hidden', 'right')
+        addClass(xAxesHidden, 'hidden');
+        removeClass(xAxesHidden, 'pending', 'right');
+
+        if (endMoved && !endMovedLeft && !startMoved) {
+            addClass(xAxesHidden, 'right');
+        }
     }
 
     function displaySelectedPoint() {
@@ -196,7 +206,6 @@ function createChart(data) {
             const point = chartData.lines[lineName].chartPoint
             point.style.animationName = visibilityMap[lineName] ? 'enter' : 'exit';
             setSVGAttr(point, 'cx', pointCoordinate);
-            // point.setAttributeNS(null, 'cy', normalized[selectedXIndex]);
             const animate = point.firstChild;
             setSVGAttr(animate, 'from', animate.getAttribute('to'));
             setSVGAttr(animate, 'to', normalized[selectedXIndex]);
@@ -227,7 +236,8 @@ function createChart(data) {
     function createYAxesGroup() {
         const g1 = createSVGElement('g');
         const g2 = createSVGElement('g');
-        addClass(g2, 'hidden');
+        addClass(g1, 'y-axes');
+        addClass(g2, 'y-axes', 'hidden');
         chart.insertBefore(g1, chart.firstChild);
         chart.insertBefore(g2, chart.firstChild);
         // zero axes is not animatable
@@ -292,16 +302,15 @@ function createChart(data) {
 
     function normalizeAndDisplayPreview(lines, data, alpha) {
         const previewNormalized = customNormalize(data, newPreviewYMax, PREVIEW_HEIGHT);
-        // const previewNormalizedOld = customNormalize(data, previewYMax, PREVIEW_HEIGHT);
-        drawLine(lines.preview, xPreviewCoordinates, previewNormalized, undefined, alpha);
+        const previewNormalizedOld = customNormalize(data, previewYMax, PREVIEW_HEIGHT);
+        drawLine(lines.preview, xPreviewCoordinates, previewNormalized, previewNormalizedOld, alpha);
     }
 
     function normalizeAndDisplay(lines, data, alpha) {
         const dataPart = data.slice(start, end);
         const normalized = customNormalize(dataPart, newYMax, CHART_HEIGHT, X_AXIS_PADDING);
-        // TODO: try to take previos values from animate element
-        // const normalizedOld = customNormalize(dataPart, yMax, CHART_HEIGHT, X_AXIS_PADDING);
-        drawLine(lines.chart, xCoordinates, normalized, undefined, alpha);
+        const normalizedOld = customNormalize(dataPart, yMax, CHART_HEIGHT, X_AXIS_PADDING);
+        drawLine(lines.chart, xCoordinates, normalized, normalizedOld, alpha);
     }
 
     function buildXCoordinates() {
@@ -327,9 +336,10 @@ function createChart(data) {
 
     function drawLine(line, x, y, oldY, alpha = 1) {
         const animate = line.firstChild;
-        // const from = x.reduce((acc, x, i) => acc + `${x},${oldY[i]} `, '');
+        // animate.endElement();
+        const from = x.reduce((acc, x, i) => acc + `${x},${oldY[i]} `, '');
         const to = x.reduce((acc, x, i) => acc + `${x},${y[i]} `, '');
-        setSVGAttr(animate, 'from', animate.getAttribute('to'));
+        setSVGAttr(animate, 'from', from);
         setSVGAttr(animate, 'to', to);
         line.style.animationName = alpha ? 'enter' : 'exit';
         animate.beginElement();
@@ -337,9 +347,6 @@ function createChart(data) {
 
     function calculateZoom(start, end = x.length, currentZoom = 1) {
         const partShown = Math.round(10 * (end - start) / x.length);
-        // return (end - start) / POINTS_PER_ZOOM
-        // return Math.round((end - start) / POINTS_PER_ZOOM)
-        // return 5 - Math.round(Math.log2(partShown));
         return Math.round(Math.log2(partShown))
     }
 
