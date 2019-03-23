@@ -1,0 +1,41 @@
+.buttons,
+.buttons > button {
+    display: flex;
+}
+
+.buttons > button {
+    padding: 6px;
+    margin-left: 10px;
+    font-size: 18px;
+    border: solid 1px #e6ecf0;
+    border-radius: 25px;
+}
+
+.buttons > button > svg {
+    border-radius: 100%;
+    border: solid 2px;
+    pointer-events: none;
+    width: 20px;
+    height: 20px;
+    padding: 2px;
+    transition: background 250ms;
+}
+
+.buttons > button > span {
+    margin: 0 10px;
+    color: #43484b;
+    line-height: 28px;
+    pointer-events: none;
+}
+
+.buttons > button path {
+    fill: white;
+}
+
+.buttons > button.m-hidden svg {
+    background: transparent !important;
+}
+
+.buttons > button.m-hidden path {
+    display: none;
+}

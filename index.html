@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <title>Telegram Charts</title>
+        <link rel="stylesheet" href="./styles/layout.css">
+        <link rel="stylesheet" href="./styles/chart.css">
+        <link rel="stylesheet" href="./styles/preview.css">
+        <link rel="stylesheet" href="./styles/chart_buttons.css">
+        <link rel="stylesheet" href="./styles/chart_point.css">
+    </head>
+    <body>
+        <div class="layout-container">
+            <h1>Followers</h1>
+            <div id="charts-container" class="charts-container"></div>
+            <div class="mode-switcher">
+                <button id="mode-switcher" />
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript" src="./src/elements_utils.js"></script>
+    <script type="text/javascript" src="./chart_data.json"></script>
+    <script type="text/javascript" src="./src/chart_svg.js"></script>
+    <script type="text/javascript" src="./src/char_buttons.js"></script>
+    <script type="text/javascript" src="./src/slider.js"></script>
+    <script type="text/javascript" src="./src/mode_switcher.js"></script>
+    <script>
+        data.forEach(createChart);
+    </script>
+</html>

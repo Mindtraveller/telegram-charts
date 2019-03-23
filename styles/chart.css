@@ -1,0 +1,84 @@
+svg {
+    will-change: contents;
+    transform: translateZ(0);
+}
+
+svg > polyline,
+svg > g,
+svg > line,
+svg > circle {
+    transform: scale(1, -1) translate(0, -100%);
+    animation-iteration-count: 1;
+    animation-duration: 250ms;
+    animation-fill-mode: forwards;
+}
+
+svg > g {
+    opacity: 0.5;
+    transition: 250ms;
+}
+
+svg > g.x-axes {
+    transform: scale(1, 1) translate(0, 100%);
+}
+
+svg > g.x-axes > text {
+    text-anchor: middle;
+}
+
+g.hidden {
+    opacity: 0;
+}
+
+g.pending {
+    transition: 0s;
+}
+
+g.hidden.m-up {
+    transform: scale(1, -1.25) translate(0, -50%);
+}
+
+g.hidden.m-down {
+    transform: scale(1, -0.5) translate(0, -200%);
+}
+
+svg > g:not(.x-axes) > text {
+    transform: scale(1, -1) translate(0, -120%);
+}
+
+/** zero axes */
+svg > g:first-of-type > text {
+    transform: scale(1, -1) translate(0, -1%);
+}
+
+.chart-wrapper > circle {
+    position: absolute;
+}
+
+@keyframes enter {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes exit {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

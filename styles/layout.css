@@ -1,0 +1,86 @@
+body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+body h1 {
+    font-size: 24px;
+    margin: 0 10px 30px;
+}
+
+button {
+    background: #0000;
+    border: none;
+    outline: none;
+}
+
+body.dark-mode {
+    background: #242f3f;
+}
+
+body.dark-mode h1 {
+    color: white;
+}
+
+body.dark-mode text,
+body.dark-mode line {
+    fill: #546778;
+}
+
+body.dark-mode circle {
+    fill: #242f3f;
+}
+
+body.dark-mode .preview-shadow {
+    background: #1f2a38;
+    opacity: 0.7;
+}
+
+body.dark-mode .preview-slider {
+    border-color: #40566b;
+}
+
+body.dark-mode .preview-slider__bar {
+    background: #384e63;
+}
+
+body.dark-mode .buttons > button > span {
+    color: #e2e6e8;
+}
+
+body.dark-mode .buttons > button {
+    border-color: #334659;
+}
+
+body.dark-mode .point-info-container {
+    background: #253242;
+    border-color: #202b39;
+}
+
+body.dark-mode .point-info-container > div:first-child {
+    color: white;
+}
+
+.layout-container {
+    max-width: 500px;
+    display: block;
+    margin: 0 auto;
+    padding: 30px 0;
+}
+
+.charts-container > .chart-wrapper {
+    position: relative;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.charts-container > .chart-wrapper > .buttons {
+    margin-top: 10px;
+}
+
+.mode-switcher > button {
+    display: block;
+    color: #2da7f4;
+    margin: 0 auto;
+    font-size: 24px;
+}
