@@ -122,6 +122,13 @@ function createChart(data) {
         }
     });
 
+    on(document, 'click', event => {
+        if (!chartRootElement.contains(event.target)) {
+            selectedXIndex = -1;
+            displaySelectedPoint();
+        }
+    })
+
     function displayYAxes() {
         if (newYMax === yMax) {
             return
@@ -187,12 +194,20 @@ function createChart(data) {
     }
 
     function displaySelectedPoint() {
-        if (selectedXIndex === -1) {
-            return;
-        }
-
         if (selectedLine) {
             chart.removeChild(selectedLine);
+            selectedLine = null;
+        }
+
+
+        if (selectedXIndex === -1) {
+            selectedPointInfo.style.display = 'none';
+            chartData.columns.forEach(column => {
+                const lineName = column[0];
+                const point = chartData.lines[lineName].chartPoint;
+                point.style.animationName = 'exit';
+            })
+            return;
         }
 
         const xValue = x[selectedXIndex];
