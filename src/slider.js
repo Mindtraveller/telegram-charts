@@ -3,8 +3,8 @@ const MIN_WIDTH = 50;
 function createSlider(chart, containerElement) {
     const x = chart.columns[0].slice(1);
     const { slider, leftBar, rightBar } = createSlider();
-    const leftShadow = createShadowElement('m-left');
-    const rightShadow = createShadowElement('m-right');
+    const leftShadow = createShadowElement('left');
+    const rightShadow = createShadowElement('right');
 
     on(leftBar, 'touchstart', handleBarTouchStart);
     on(leftBar, 'mousedown', handleBarTouchStart);
@@ -18,10 +18,7 @@ function createSlider(chart, containerElement) {
     let NEXT_RIGHT_BORDER = 0;
     let LEFT_BORDER;
     let NEXT_LEFT_BORDER;
-    let recentEmittedBorders = {
-        start: -1,
-        end: -1
-    };
+    let recentEmittedBorders = { start: -1, end: -1 };
 
     let touchStartX;
 
@@ -135,31 +132,21 @@ function createSlider(chart, containerElement) {
     }
 
     function createShadowElement(className) {
-        const shadow = createElement('div');
-        addClass(shadow, 'preview-shadow', className);
-        return shadow;
+        return addClass(el('div'), 'shadow', className);
     }
 
     function createSlider() {
-        const slider = createElement('div');
-        addClass(slider, 'preview-slider');
-        const leftBar = createElement('div');
-        addClass(leftBar, 'preview-slider__bar', 'm-left');
-        const rightBar = createElement('div');
-        addClass(rightBar, 'preview-slider__bar', 'm-right');
-        slider.appendChild(leftBar);
-        slider.appendChild(rightBar);
-        return {
-            slider,
-            leftBar,
-            rightBar
-        };
+        const slider = addClass(el('div'), 'slider');
+        const leftBar = addClass(el('div'), 'slider__bar');
+        const rightBar = addClass(el('div'), 'slider__bar', 'right');
+        add(slider, leftBar);
+        add(slider, rightBar);
+        return { slider, leftBar, rightBar };
     }
 
-    const sliderContainer = createElement('div');
-    addClass(sliderContainer, 'preview-slider-container');
-    sliderContainer.appendChild(leftShadow);
-    sliderContainer.appendChild(slider);
-    sliderContainer.appendChild(rightShadow);
+    const sliderContainer = addClass(el('div'), 'slider-container');
+    add(sliderContainer, leftShadow);
+    add(sliderContainer, slider);
+    add(sliderContainer, rightShadow);
     return sliderContainer;
 }

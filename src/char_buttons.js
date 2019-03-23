@@ -1,42 +1,33 @@
-function createButtons(chart, chartRootElement) {
-    const buttons = createElement('div');
-    addClass(buttons, 'buttons');
+function createButtons(chartData, chartRootElement) {
+    const buttons = addClass(el('div'), 'buttons');
     on(buttons, 'click', handleButtonClick);
 
-    let visibilityMap = Object.keys(chart.names).reduce((acc, chartName) => ({
+    let visibilityMap = Object.keys(chartData.names).reduce((acc, chartName) => ({
         ...acc,
-        [chartName]: true
+        [chartName]: true,
     }), {});
 
-    showChartButtons(chart);
-
-    function showChartButtons(chartData) {
-        Object.keys(chartData.names).forEach(chart => {
-            const button = createElement('button');
-            const icon = createSVGElement('svg');
-            setSVGAttr(icon, 'width', '24');
-            setSVGAttr(icon, 'height', '24');
-            setSVGAttr(icon, 'viewBox', '0 0 24 24');
-            icon.style.borderColor = chartData.colors[chart];
-            icon.style.background = chartData.colors[chart];
-            const iconPath = createSVGElement('path');
-            setSVGAttr(iconPath, 'd', 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z');
-            icon.appendChild(iconPath);
-            button.appendChild(icon);
-            const text = document.createTextNode(chartData.names[chart]);
-            const span = createElement('span');
-            span.appendChild(text);
-            button.appendChild(span);
-            button.dataset.chart = chart;
-            buttons.appendChild(button);
-        })
-    }
+    Object.keys(chartData.names).forEach(chart => {
+        const button = el('button');
+        const icon = svgEl('svg', { width: '24', height: '24', viewBox: '0 0 24 24' });
+        icon.style.borderColor = chartData.colors[chart];
+        icon.style.background = chartData.colors[chart];
+        const iconPath = svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' });
+        add(icon, iconPath);
+        add(button, icon);
+        const span = el('span');
+        add(span, t(chartData.names[chart]));
+        add(button, span);
+        button.dataset.chart = chart;
+        add(buttons, button);
+    });
 
     function handleButtonClick(event) {
         const chartToggled = event.target.dataset.chart;
         if (!chartToggled) {
             return;
         }
+
         const newVisibilityMap = {
             ...visibilityMap,
             [chartToggled]: !visibilityMap[chartToggled],

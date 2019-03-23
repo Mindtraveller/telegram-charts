@@ -24,20 +24,20 @@ function createChart(data) {
 
     const X_LABELS_STEP = Math.round(x.length / ZOOM_STEP / X_LABELS_MAX_NUMBER);
 
-    const chartRootElement = createChartRootElement();
+    const chartRootElement = addClass(el('div'), 'chart-wrapper');
     const chart = createChart();
     const { preview, previewContainer } = createPreview();
     let { buttons, visibilityMap } = createButtons(chartData, chartRootElement);
     const { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo();
     let { xAxes, xAxesHidden } = createXAxes();
 
-    chart.appendChild(xAxes);
-    chart.appendChild(xAxesHidden);
-    chartRootElement.appendChild(chart);
-    chartRootElement.appendChild(previewContainer)
-    chartRootElement.appendChild(buttons);
-    chartRootElement.appendChild(selectedPointInfo);
-    chartsContainer.appendChild(chartRootElement);
+    add(chart, xAxes);
+    add(chart, xAxesHidden);
+    add(chartRootElement, chart);
+    add(chartRootElement, previewContainer);
+    add(chartRootElement, buttons);
+    add(chartRootElement, selectedPointInfo);
+    add(chartsContainer, chartRootElement);
 
     let yAxesGroupShown;
     let yAxesGroupHidden;
@@ -141,8 +141,8 @@ function createChart(data) {
         normalizedAxes.forEach((y, i) => {
             const line = createAxisLine(10, CHART_WIDTH - 10, y + X_AXIS_PADDING, y + X_AXIS_PADDING);
             const text = createSVGText(axes[axes.length - i - 1], 5, y);
-            yAxesGroupHidden.appendChild(line);
-            yAxesGroupHidden.appendChild(text);
+            add(yAxesGroupHidden, line);
+            add(yAxesGroupHidden, text);
         });
         removeClass(yAxesGroupHidden, 'm-down', 'm-up');
         removeClass(yAxesGroupShown, 'm-down', 'm-up');
@@ -169,7 +169,7 @@ function createChart(data) {
 
         for (let i = firstLabelCoordinateIndex; i < xCoordinates.length - 1; i += step) {
             const label = createSVGText(xLabels[(start + i) / step], xCoordinates[i], 0);
-            xAxes.appendChild(label);
+            add(xAxes, label);
         }
     }
 
@@ -199,7 +199,6 @@ function createChart(data) {
             selectedLine = null;
         }
 
-
         if (selectedXIndex === -1) {
             selectedPointInfo.style.display = 'none';
             chartData.columns.forEach(column => {
@@ -220,10 +219,12 @@ function createChart(data) {
             const normalized = customNormalize(data, yMax, CHART_HEIGHT, X_AXIS_PADDING);
             const point = chartData.lines[lineName].chartPoint
             point.style.animationName = visibilityMap[lineName] ? 'enter' : 'exit';
-            setSVGAttr(point, 'cx', pointCoordinate);
+            svgAttrs(point, { cx: pointCoordinate })
             const animate = point.firstChild;
-            setSVGAttr(animate, 'from', animate.getAttribute('to'));
-            setSVGAttr(animate, 'to', normalized[selectedXIndex]);
+            svgAttrs(animate, {
+                from: animate.getAttribute('to'),
+                to: normalized[selectedXIndex]
+            });
             animate.beginElement();
 
             pointChartValues[lineName].innerText = data[selectedXIndex];
@@ -249,8 +250,8 @@ function createChart(data) {
     }
 
     function createYAxesGroup() {
-        const g1 = createSVGElement('g');
-        const g2 = createSVGElement('g');
+        const g1 = svgEl('g');
+        const g2 = svgEl('g');
         addClass(g1, 'y-axes');
         addClass(g2, 'y-axes', 'hidden');
         chart.insertBefore(g1, chart.firstChild);
@@ -262,9 +263,9 @@ function createChart(data) {
     }
 
     function createXAxes() {
-        const xAxes = createSVGElement('g');
+        const xAxes = svgEl('g');
         addClass(xAxes, 'x-axes');
-        const xAxesHidden = createSVGElement('g');
+        const xAxesHidden = svgEl('g');
         addClass(xAxesHidden, 'x-axes', 'hidden');
         return {
             xAxes,
@@ -285,12 +286,12 @@ function createChart(data) {
                 preview: previewLine,
                 chartPoint,
             };
-            chartLine.appendChild(createAnimate());
-            previewLine.appendChild(createAnimate());
-            chartPoint.appendChild(createAnimate('cy'));
-            chart.appendChild(chartLine);
-            chart.appendChild(chartPoint);
-            preview.appendChild(previewLine);
+            add(chartLine, createAnimate());
+            add(previewLine, createAnimate());
+            add(chartPoint, createAnimate('cy'));
+            add(chart, chartLine);
+            add(chart, chartPoint);
+            add(preview, previewLine);
         });
     }
 
@@ -351,16 +352,14 @@ function createChart(data) {
 
     function drawLine(line, x, y, oldY, alpha = 1) {
         const animate = line.firstChild;
-        // animate.endElement();
         const from = x.reduce((acc, x, i) => acc + `${x},${oldY[i]} `, '');
         const to = x.reduce((acc, x, i) => acc + `${x},${y[i]} `, '');
-        setSVGAttr(animate, 'from', from);
-        setSVGAttr(animate, 'to', to);
+        svgAttrs(animate, { from, to });
         line.style.animationName = alpha ? 'enter' : 'exit';
         animate.beginElement();
     }
 
-    function calculateZoom(start, end = x.length, currentZoom = 1) {
+    function calculateZoom(start, end = x.length) {
         const partShown = Math.round(10 * (end - start) / x.length);
         return Math.round(Math.log2(partShown))
     }
@@ -387,103 +386,66 @@ function createChart(data) {
         return Math.max(...data);
     }
 
-    function createAnimate(attribute = 'points') {
-        const animate = createSVGElement('animate');
-        setSVGAttr(animate, 'attributeName', attribute);
-        setSVGAttr(animate, 'repeatCount', 1);
-        setSVGAttr(animate, 'dur', '250ms');
-        setSVGAttr(animate, 'fill', 'freeze');
-        return animate;
+    function createAnimate(attributeName = 'points') {
+        return svgEl('animate', { attributeName, repeatCount: 1, dur: '250ms', fill: 'freeze' });
     }
 
     function createChartLine(color, width) {
-        const line = createSVGElement('polyline');
-        setSVGAttr(line, 'fill', 'none');
-        setSVGAttr(line, 'stroke', color);
-        setSVGAttr(line, 'stroke-width', width);
-        return line;
+        return svgEl('polyline', { fill: 'none', 'stroke': color, 'stroke-width': width });
     }
 
     function createChartPoint(color) {
-        const line = createSVGElement('circle');
-        setSVGAttr(line, 'r', 6);
-        setSVGAttr(line, 'fill', 'white');
-        setSVGAttr(line, 'stroke', color);
-        setSVGAttr(line, 'stroke-width', 2.5);
-        return line;
+        return svgEl('circle', { r: 6, fill: 'white', 'stroke': color, 'stroke-width': 2.5 });
     }
 
     function crateZeroAxisLine() {
-        const group = createSVGElement('g');
+        const group = svgEl('g');
         const line = createAxisLine(10, CHART_WIDTH - 10, X_AXIS_PADDING, X_AXIS_PADDING);
         const text = createSVGText('0', 5, -X_AXIS_PADDING);
-        group.appendChild(line);
-        group.appendChild(text);
+        add(group, line);
+        add(group, text);
         return group;
     }
 
     function createAxisLine(x1, x2, y1, y2) {
-        const line = createSVGElement('line');
-        setSVGAttr(line, 'x1', x1);
-        setSVGAttr(line, 'y1', y1);
-        setSVGAttr(line, 'x2', x2);
-        setSVGAttr(line, 'y2', y2);
-        setSVGAttr(line, 'fill', 'gray');
-        setSVGAttr(line, 'stroke', 'gray');
-        setSVGAttr(line, 'stroke-width', 0.3);
-        return line;
+        return svgEl('line', { x1, y1, x2, y2, fill: 'gray', stroke: 'gray', 'stroke-width': .3 });
     }
 
     function createSVGText(text, x, y) {
-        const t = createSVGElement('text');
-        setSVGAttr(t, 'x', x);
-        setSVGAttr(t, 'y', y);
+        const t = svgEl('text', { x, y });
         t.textContent = text;
         return t;
     }
 
     function createChart() {
-        const svg = createSVGElement('svg');
-        setSVGAttr(svg, 'viewBox', `0 0 ${CHART_WIDTH} ${CHART_HEIGHT + X_AXIS_PADDING}`);
-        return svg;
-    }
-
-    function createChartRootElement() {
-        const root = createElement('div');
-        addClass(root, 'chart-wrapper');
-        return root;
+        return svgEl('svg', { viewBox: `0 0 ${CHART_WIDTH} ${CHART_HEIGHT + X_AXIS_PADDING}` });
     }
 
     function createPreview() {
-        const container = createElement('div');
-        addClass(container, 'preview-container');
-        const svg = createSVGElement('svg');
-        setSVGAttr(svg, 'viewBox', `0 0 ${PREVIEW_WIDTH} ${PREVIEW_HEIGHT}`);
-        container.appendChild(svg);
-        container.appendChild(createSlider(chartData, chartRootElement));
-        return {
-            previewContainer: container,
-            preview: svg
-        };
+        const container = addClass(el('div'), 'preview-container');
+        const svg = svgEl('svg', { viewBox: `0 0 ${PREVIEW_WIDTH} ${PREVIEW_HEIGHT}` });
+        add(container, svg);
+        add(container, createSlider(chartData, chartRootElement));
+        return { previewContainer: container, preview: svg };
     }
 
     function createSelectedPointInfo() {
-        const info = createElement('div');
+        const info = el('div');
         addClass(info, 'point-info-container');
-        const chartInfoContainer = createElement('div');
+        const chartInfoContainer = el('div');
         addClass(chartInfoContainer, 'point-info__chart-info-container');
-        const date = createElement('div');
-        info.appendChild(date);
-        info.appendChild(chartInfoContainer);
+        const date = el('div');
+        add(info, date);
+        add(info, chartInfoContainer);
         const chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
-            const div = createElement('div');
+            const div = el('div');
             div.style.color = chartData.colors[chart];
             addClass(div, 'point-info__chart-info');
-            const value = createElement('span');
-            div.appendChild(value);
+            const value = el('span');
+            add(div, value);
             acc[chart] = value;
-            div.appendChild(createText(chartName))
-            chartInfoContainer.appendChild(div)
+            add(div, t(chartName));
+            add(chartInfoContainer, div);
             return acc;
         }, {})
 

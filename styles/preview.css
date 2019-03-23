@@ -3,7 +3,7 @@
     margin: 0 10px;
 }
 
-.preview-slider-container {
+.slider-container {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -13,28 +13,28 @@
     display: flex;
 }
 
-.preview-shadow {
+.shadow {
     position: relative;
     background: #d3d3d3;
     opacity: 0.3;
 }
 
-.preview-shadow.m-left {
+.shadow.left {
     left: 0;
 }
 
-.preview-shadow.m-right {
+.shadow.right {
     right: 0;
 }
 
-.preview-slider {
+.slider {
     position: relative;
     flex-grow: 1;
     border-top: 1px solid #e0eaf0;
     border-bottom: 1px solid #e0eaf0;
 }
 
-.preview-slider__bar {
+.slider__bar {
     position: absolute;
     width: 6px;
     height: 100%;
@@ -42,6 +42,6 @@
     opacity: 0.5;
 }
 
-.preview-slider__bar.m-right {
+.slider__bar.right {
     right: 0;
 }

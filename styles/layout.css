@@ -31,16 +31,16 @@ body.dark-mode circle {
     fill: #242f3f;
 }
 
-body.dark-mode .preview-shadow {
+body.dark-mode .shadow {
     background: #1f2a38;
     opacity: 0.7;
 }
 
-body.dark-mode .preview-slider {
+body.dark-mode .slider {
     border-color: #40566b;
 }
 
-body.dark-mode .preview-slider__bar {
+body.dark-mode .slider__bar {
     background: #384e63;
 }
 

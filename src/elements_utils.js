@@ -1,27 +1,34 @@
-const SVG_NS = 'http://www.w3.org/2000/svg'
-
-function createElement(elementName) {
+function el(elementName) {
     return document.createElement(elementName);
 }
 
-function createText(text) {
+function t(text) {
     return document.createTextNode(text);
 }
 
-function createSVGElement(elementName) {
-    return document.createElementNS(SVG_NS, elementName);
+function svgEl(elementName, attributes) {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', elementName);
+    svgAttrs(element, attributes);
+    return element;
 }
 
-function setSVGAttr(element, propertyName, value) {
-    element.setAttributeNS(null, propertyName, value);
+function svgAttrs(element, attributes = {}) {
+    Object.entries(attributes).forEach(([attributes, value]) => {
+        element.setAttributeNS(null, attributes, value);
+    });
 }
 
 function addClass(element, ...className) {
     element.classList.add(...className);
+    return element;
 }
 
 function removeClass(element, ...className) {
     element.classList.remove(...className);
+}
+
+function add(parent, child) {
+    parent.appendChild(child);
 }
 
 function on(element, eventName, callback) {

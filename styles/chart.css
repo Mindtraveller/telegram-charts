@@ -7,10 +7,11 @@ svg > polyline,
 svg > g,
 svg > line,
 svg > circle {
-    transform: scale(1, -1) translate(0, -100%);
+    transform: scale(1, -1) translate(0, -100%) translateZ(0);
     animation-iteration-count: 1;
     animation-duration: 250ms;
     animation-fill-mode: forwards;
+    will-change: contents;
 }
 
 svg > g {

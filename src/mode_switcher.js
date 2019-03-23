@@ -12,4 +12,4 @@
         isDark = !isDark;
         button.innerText = isDark ? DARK_LABEL : LIGHT_LABEL;
     }
-})()
+})();
