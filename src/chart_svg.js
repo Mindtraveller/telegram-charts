@@ -1,5 +1,5 @@
 function createChart(data) {
-    const chartsContainer = document.getElementById('charts-container');
+    const chartsContainer = d.getElementById('charts-container');
     const MAX_CHART_WIDTH = 500;
     const CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth); // same width for preview as well
     const CHART_HEIGHT = 400;
@@ -120,7 +120,7 @@ function createChart(data) {
         }
     });
 
-    on(document, 'click', event => {
+    on(d, 'click', event => {
         if (!chartRootElement.contains(event.target)) {
             selectedXIndex = -1;
             displaySelectedPoint();

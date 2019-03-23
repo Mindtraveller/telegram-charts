@@ -1,13 +1,15 @@
+const d = document;
+
 function el(elementName) {
-    return document.createElement(elementName);
+    return d.createElement(elementName);
 }
 
 function t(text) {
-    return document.createTextNode(text);
+    return d.createTextNode(text);
 }
 
 function svgEl(elementName, attributes) {
-    const element = document.createElementNS('http://www.w3.org/2000/svg', elementName);
+    const element = d.createElementNS('http://www.w3.org/2000/svg', elementName);
     svgAttrs(element, attributes);
     return element;
 }
