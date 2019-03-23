@@ -1,5 +1,5 @@
 function createButtons(chartData, chartRootElement) {
-    const buttons = addClass(el('div'), 'buttons');
+    let buttons = addClass(el('div'), 'buttons');
     on(buttons, 'click', handleButtonClick);
 
     let visibilityMap = Object.keys(chartData.names).reduce((acc, chartName) => ({
@@ -8,14 +8,14 @@ function createButtons(chartData, chartRootElement) {
     }), {});
 
     Object.keys(chartData.names).forEach(chart => {
-        const button = el('button');
-        const icon = svgEl('svg', { width: '20', height: '20', viewBox: '0 0 24 24' });
+        let button = el('button');
+        let icon = svgEl('svg', { width: '20', height: '20', viewBox: '0 0 24 24' });
         icon.style.borderColor = chartData.colors[chart];
         icon.style.background = chartData.colors[chart];
-        const iconPath = svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' });
+        let iconPath = svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' });
         add(icon, iconPath);
         add(button, icon);
-        const span = el('span');
+        let span = el('span');
         add(span, t(chartData.names[chart]));
         add(button, span);
         button.dataset.chart = chart;
@@ -23,12 +23,12 @@ function createButtons(chartData, chartRootElement) {
     });
 
     function handleButtonClick(event) {
-        const chartToggled = event.target.dataset.chart;
+        let chartToggled = event.target.dataset.chart;
         if (!chartToggled) {
             return;
         }
 
-        const newVisibilityMap = {
+        let newVisibilityMap = {
             ...visibilityMap,
             [chartToggled]: !visibilityMap[chartToggled],
         };

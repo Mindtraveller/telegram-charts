@@ -1,4 +1,4 @@
-const d = document;
+let d = document;
 
 function el(elementName) {
     return d.createElement(elementName);
@@ -9,7 +9,7 @@ function t(text) {
 }
 
 function svgEl(elementName, attributes) {
-    const element = d.createElementNS('http://www.w3.org/2000/svg', elementName);
+    let element = d.createElementNS('http://www.w3.org/2000/svg', elementName);
     svgAttrs(element, attributes);
     return element;
 }

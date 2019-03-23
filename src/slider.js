@@ -1,10 +1,10 @@
 function createSlider(chart, containerElement) {
-    const MIN_WIDTH = 50;
+    let MIN_WIDTH = 50;
 
-    const x = chart.columns[0].slice(1);
-    const { slider, leftBar, rightBar } = createSlider();
-    const leftShadow = addClass(el('div'), 'shadow', 'left');
-    const rightShadow = addClass(el('div'), 'shadow', 'right');
+    let x = chart.columns[0].slice(1);
+    let { slider, leftBar, rightBar } = createSlider();
+    let leftShadow = addClass(el('div'), 'shadow', 'left');
+    let rightShadow = addClass(el('div'), 'shadow', 'right');
 
     on(containerElement, 'mousedown', handleTouchStart);
     on(containerElement, 'touchstart', handleTouchStart);
@@ -29,7 +29,7 @@ function createSlider(chart, containerElement) {
 
     function handleTouchStart(event) {
         let target = event.target;
-        const moveHandler = target === slider
+        let moveHandler = target === slider
             ? handleSliderMove
             : target === leftBar || target === rightBar
                 ? moveEvent => handleBarMove(moveEvent, target === leftBar)
@@ -41,7 +41,7 @@ function createSlider(chart, containerElement) {
 
         touchStartX = getX(event);
 
-        const endHandler = () => {
+        let endHandler = () => {
             persistBorders();
             off(containerElement, 'mousemove', moveHandler);
             off(containerElement, 'touchmove', moveHandler);
@@ -57,10 +57,10 @@ function createSlider(chart, containerElement) {
 
     function handleSliderMove(event) {
         event.preventDefault();
-        const newX = getX(event);
-        const diff = touchStartX - newX;
-        const newLeftBorder = LEFT_BORDER - diff;
-        const newRightBorder = RIGHT_BORDER + diff;
+        let newX = getX(event);
+        let diff = touchStartX - newX;
+        let newLeftBorder = LEFT_BORDER - diff;
+        let newRightBorder = RIGHT_BORDER + diff;
 
         if (canMoveBorders(newLeftBorder, newRightBorder)) {
             moveLeftBorder(newLeftBorder);
@@ -71,10 +71,10 @@ function createSlider(chart, containerElement) {
 
     function handleBarMove(event, isLeft) {
         event.preventDefault();
-        const newX = getX(event);
-        const diff = touchStartX - newX
-        const newLeftBorder = isLeft ? Math.max(0, LEFT_BORDER - diff) : NEXT_LEFT_BORDER;
-        const newRightBorder = isLeft ? NEXT_RIGHT_BORDER : Math.max(0, RIGHT_BORDER + diff);
+        let newX = getX(event);
+        let diff = touchStartX - newX
+        let newLeftBorder = isLeft ? Math.max(0, LEFT_BORDER - diff) : NEXT_LEFT_BORDER;
+        let newRightBorder = isLeft ? NEXT_RIGHT_BORDER : Math.max(0, RIGHT_BORDER + diff);
 
         if (canMoveBorders(newLeftBorder, newRightBorder)) {
             isLeft ? moveLeftBorder(newLeftBorder) : moveRightBorder(newRightBorder);
@@ -112,7 +112,7 @@ function createSlider(chart, containerElement) {
     }
 
     function emitBorderChange() {
-        const borders = {
+        let borders = {
             start: Math.max(0, Math.floor(NEXT_LEFT_BORDER * x.length / TOTAL_WIDTH)),
             end: Math.min(x.length - 1, Math.round((TOTAL_WIDTH - NEXT_RIGHT_BORDER) * x.length / TOTAL_WIDTH)),
         }
@@ -126,15 +126,15 @@ function createSlider(chart, containerElement) {
     }
 
     function createSlider() {
-        const slider = addClass(el('div'), 'slider');
-        const leftBar = addClass(el('div'), 'slider__bar');
-        const rightBar = addClass(el('div'), 'slider__bar', 'right');
+        let slider = addClass(el('div'), 'slider');
+        let leftBar = addClass(el('div'), 'slider__bar');
+        let rightBar = addClass(el('div'), 'slider__bar', 'right');
         add(slider, leftBar);
         add(slider, rightBar);
         return { slider, leftBar, rightBar };
     }
 
-    const sliderContainer = addClass(el('div'), 'slider-container');
+    let sliderContainer = addClass(el('div'), 'slider-container');
     add(sliderContainer, leftShadow);
     add(sliderContainer, slider);
     add(sliderContainer, rightShadow);

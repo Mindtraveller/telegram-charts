@@ -1,9 +1,9 @@
 (() => {
-    const LIGHT_LABEL = 'Switch to Night Mode';
-    const DARK_LABEL = 'Switch to Day Mode';
+    let LIGHT_LABEL = 'Switch to Night Mode';
+    let DARK_LABEL = 'Switch to Day Mode';
     let isDark = false;
 
-    const button = d.getElementById('mode-switcher');
+    let button = d.getElementById('mode-switcher');
     on(button, 'click', handleModeSwitch);
     button.innerText = LIGHT_LABEL;
 
