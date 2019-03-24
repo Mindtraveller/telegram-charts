@@ -309,7 +309,10 @@ function createChart(data) {
 
     function drawPreviewLine(line, x, y, alpha = 1) {
         let animate = line.firstChild;
-        let from = animate.getAttribute('to') || x.reduce((acc, x) => acc + `${x.toFixed(2)},0 `, '').trim();
+        let from = animate.getAttribute('to');
+        if (from === '0') {
+            from = x.reduce((acc, x) => acc + `${x.toFixed(2)},0 `, '').trim();
+        }
         let to = x.reduce((acc, x, i) => acc + `${x.toFixed(2)},${y[i].toFixed(2)} `, '').trim();
         svgAttrs(animate, { from, to });
         line.style.animationName = alpha ? 'enter' : 'exit';

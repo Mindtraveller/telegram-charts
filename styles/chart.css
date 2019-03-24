@@ -1,8 +1,12 @@
-svg > polyline,
-svg > g,
+polyline,
+g,
 svg > line,
-svg > circle {
+circle {
     transform: scale(1, -1) translate(0, -100%);
+}
+
+polyline,
+circle {
     animation-iteration-count: 1;
     animation-duration: 250ms;
     animation-fill-mode: forwards;
