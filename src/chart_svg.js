@@ -18,7 +18,7 @@ function createChart(data) {
     let x = data.columns[0].slice(1);
     let chartData = {
         ...data,
-        columns: data.columns.slice(1),
+        columns: data.columns.slice(1).map(column => ({ name: column[0], data: column.slice(1) })),
         lines: {},
     };
 
@@ -31,19 +31,18 @@ function createChart(data) {
     let { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo();
     let { xAxes, xAxesHidden } = createXAxes();
     let { yAxesGroupShown, yAxesGroupHidden } = createYAxes();
+    let selectedLine = createAxisLine(0, 0, X_AXIS_PADDING, X_AXIS_PADDING + CHART_HEIGHT);
 
-    add(chart, createZeroYAxis(), yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden);
+    add(chart, createZeroYAxis(), selectedLine, yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden);
     add(chartRootElement, chart, previewContainer, buttons, selectedPointInfo);
 
     let start = 0;
     let end = undefined;
     let selectedXIndex = -1;
-    let selectedLine;
 
     let yMax = 0;
     let previewYMax = 0;
-    // TODO: change structure to { name, data } to get rid of extra slices
-    let columnsToShow = chartData.columns.filter(column => visibilityMap[column[0]]);
+    let columnsToShow = chartData.columns;
 
     let xCoordinates = buildXCoordinates();
     let xPreviewCoordinates = normalize(x, CHART_WIDTH);
@@ -54,32 +53,33 @@ function createChart(data) {
     let zoom = calculateZoom(start, end);
     let xLabels = buildXLabels();
 
+    let yAxesUpdateTimeout = null;
+
     createChartLines();
     add(chartsContainer, chartRootElement);
 
     displayData(true);
-    displayYAxes();
+    displayYAxes(yMax, newYMax);
 
     yMax = newYMax;
     previewYMax = newPreviewYMax;
 
     on(chartRootElement, 'visibility-updated', ({ detail: newMap }) => {
         visibilityMap = newMap;
-        let newColumnsToShow = chartData.columns.filter(column => visibilityMap[column[0]]);
+        let newColumnsToShow = chartData.columns.filter(column => visibilityMap[column.name]);
 
         newYMax = calculateYMax(newColumnsToShow);
         newPreviewYMax = calculatePreviewYMax(newColumnsToShow);
 
         let isAdding = newColumnsToShow.length > columnsToShow.length;
         let columnsToUse = isAdding ? newColumnsToShow : columnsToShow;
-        eachColumn(columnsToUse, (column, columnName) => {
-            let data = column.slice(1);
+        eachColumn(columnsToUse, (data, columnName) => {
             let alpha = visibilityMap[columnName] ? 1 : 0;
             normalizeAndDisplay(chartData.lines[columnName], data, alpha);
             normalizeAndDisplayPreview(chartData.lines[columnName], data, alpha);
         });
 
-        displayYAxes();
+        displayYAxes(yMax, newYMax);
 
         yMax = newYMax;
         previewYMax = newPreviewYMax;
@@ -93,7 +93,6 @@ function createChart(data) {
 
         if (newZoom !== zoom) {
             zoom = newZoom;
-            console.log(zoom);
             xLabels = buildXLabels();
             animateXLabels(start, newStart, end, newEnd);
         }
@@ -104,11 +103,18 @@ function createChart(data) {
 
         newYMax = calculateYMax(columnsToShow);
         displayData();
-        displayYAxes();
-        displayXAxes();
+
+        if (!yAxesUpdateTimeout) {
+            let _yMax = yMax;
+            yAxesUpdateTimeout = setTimeout(() => {
+                displayYAxes(_yMax, newYMax);
+                yAxesUpdateTimeout = null;
+            }, 100);
+        }
 
         yMax = newYMax;
 
+        displayXAxes();
         displaySelectedPoint();
     });
 
@@ -128,7 +134,7 @@ function createChart(data) {
         }
     })
 
-    function displayYAxes() {
+    function displayYAxes(yMax, newYMax) {
         if (newYMax === yMax) {
             return
         }
@@ -196,37 +202,29 @@ function createChart(data) {
     }
 
     function displaySelectedPoint() {
-        if (selectedLine) {
-            chart.removeChild(selectedLine);
-            selectedLine = null;
-        }
-
-        if (selectedXIndex === -1) {
+        if (selectedXIndex === -1 || selectedXIndex < start || selectedXIndex > end) {
+            selectedLine.style.display = 'none';
             selectedPointInfo.style.display = 'none';
             eachColumn(chartData.columns, (column, lineName) => {
                 let point = chartData.lines[lineName].chartPoint;
                 point.style.animationName = 'exit';
-            })
+            });
             return;
         }
 
-        // TODO: hide points when selected index is outside of window
-
         let xValue = x[selectedXIndex];
         let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end - 1] - x[start]);
-        selectedLine = createAxisLine(xCoordinate, xCoordinate, X_AXIS_PADDING, X_AXIS_PADDING + CHART_HEIGHT);
+        svgAttrs(selectedLine, { x1: xCoordinate, x2: xCoordinate });
 
-        eachColumn(chartData.columns, (column, lineName) => {
-            let data = column.slice(1);
-            // TODO: get rid of normalization
-            let normalized = customNormalize(data, yMax, CHART_HEIGHT, X_AXIS_PADDING);
+        eachColumn(chartData.columns, (data, lineName) => {
+            let y = customNormalize([data[selectedXIndex]], yMax, CHART_HEIGHT, X_AXIS_PADDING)[0];
             let point = chartData.lines[lineName].chartPoint;
             point.style.animationName = visibilityMap[lineName] ? 'enter' : 'exit';
             svgAttrs(point, { cx: xCoordinate });
             let animate = point.firstChild;
             svgAttrs(animate, {
                 from: animate.getAttribute('to'),
-                to: normalized[selectedXIndex],
+                to: y,
             });
             animate.beginElement();
 
@@ -234,25 +232,25 @@ function createChart(data) {
             pointChartValues[lineName].parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none';
         });
 
-        chart.insertBefore(selectedLine, chart.firstChild); // to be behind another items
         pointDate.innerText = new Date(xValue).toString().slice(0, 10);
         let fromRight = xCoordinate > CHART_WIDTH / 2;
         selectedPointInfo.style[fromRight ? 'right' : 'left'] = `${fromRight ? CHART_WIDTH - xCoordinate : xCoordinate}px`;
         selectedPointInfo.style[fromRight ? 'left' : 'right'] = null;
         selectedPointInfo.style.display = 'block';
+        selectedLine.style.display = 'block';
+
     }
 
     function calculatePreviewYMax(columns) {
-        return getMax(columns.reduce((acc, column) => acc.concat(column.slice(1)), []));
+        return getMax(columns.reduce((acc, column) => acc.concat(column.data), []));
     }
 
     function calculateYMax(columns) {
-        return getMax(columns.reduce((acc, column) => acc.concat(column.slice(1 + start, end ? 1 + end : undefined)), []));
+        return getMax(columns.reduce((acc, column) => acc.concat(column.data.slice(start, end)), []));
     }
 
     function displayData(updatePreview = false) {
-        eachColumn(columnsToShow, (column, lineName) => {
-            let data = column.slice(1);
+        eachColumn(columnsToShow, (data, lineName) => {
             normalizeAndDisplay(chartData.lines[lineName], data);
             updatePreview && normalizeAndDisplayPreview(chartData.lines[lineName], data);
         });
@@ -325,7 +323,7 @@ function createChart(data) {
     }
 
     function eachColumn(columns, callback) {
-        columns.forEach(column => callback(column, column[0]));
+        columns.forEach(column => callback(column.data, column.name));
     }
 
     function getMax(data) {
@@ -395,7 +393,7 @@ function createChart(data) {
     function createPreview() {
         let container = el('div', 'preview-container');
         let svg = svgEl('svg', { viewBox: `0 0 ${CHART_WIDTH} ${PREVIEW_HEIGHT}` });
-        add(container, svg, createSlider(chartData, chartRootElement));
+        add(container, svg, createSlider(x, chartRootElement));
         return { previewContainer: container, preview: svg };
     }
 

@@ -48,16 +48,16 @@ g.pending {
     display: none;
 }
 
+.y-axes {
+    transform: scale(1, 1) translateY(-20%);
+}
+
 .y-axes.hidden.m-up {
     transform: scale(1, 0.5) translate(0, -100%);
 }
 
 .y-axes.hidden.m-down {
     transform: scale(1, 0.5) translate(0, 100%);
-}
-
-.y-axes {
-    transform: scale(1, 1) translateY(-20%);
 }
 
 /** zero axes */

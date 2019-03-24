@@ -1,7 +1,6 @@
-function createSlider(chart, containerElement) {
+function createSlider(x, containerElement) {
     let MIN_WIDTH = 50;
 
-    let x = chart.columns[0].slice(1);
     let { slider, leftBar, rightBar } = createSlider();
     let leftShadow = el('div', 'shadow', 'left');
     let rightShadow = el('div', 'shadow', 'right');
