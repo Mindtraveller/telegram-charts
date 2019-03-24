@@ -223,7 +223,7 @@ function createChart(data) {
         }
 
         let xValue = x[selectedXIndex];
-        let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end - 1] - x[start]);
+        let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end] - x[start]);
         svgAttrs(selectedLine, { x1: xCoordinate, x2: xCoordinate });
 
         eachColumn(chartData.columns, (data, lineName) => {
