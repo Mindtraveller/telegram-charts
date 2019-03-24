@@ -37,7 +37,7 @@ function createChart(data) {
     add(chartRootElement, chart, previewContainer, buttons, selectedPointInfo);
 
     let start = 0;
-    let end = undefined;
+    let end = x.length;
     let selectedXIndex = -1;
 
     let yMax = 0;
@@ -51,7 +51,8 @@ function createChart(data) {
     let newPreviewYMax = calculatePreviewYMax(columnsToShow);
 
     let zoom = calculateZoom(start, end);
-    let xLabels = buildXLabels();
+    // let allXLabels = buildXLabels(zoom); // TODO: used them
+    let xLabels = buildXLabels(zoom);
 
     let yAxesUpdateTimeout = null;
 
@@ -92,9 +93,9 @@ function createChart(data) {
         let newZoom = calculateZoom(newStart, newEnd);
 
         if (newZoom !== zoom) {
+            xLabels = buildXLabels(newZoom);
+            animateXLabels(zoom, newZoom, start, newStart, end, newEnd);
             zoom = newZoom;
-            xLabels = buildXLabels();
-            animateXLabels(start, newStart, end, newEnd);
         }
 
         start = newStart;
@@ -169,10 +170,18 @@ function createChart(data) {
     function displayXAxes() {
         clearChildren(xAxes);
 
-        let step = getLabelsStep();
+        let step = getXLabelsStep(zoom);
         let firstLabelCoordinateIndex = 1; // do not pick the first item for nice indents from the chart borders
         while ((start + firstLabelCoordinateIndex) % step !== 0) {
             firstLabelCoordinateIndex++;
+        }
+
+        // always insert label the will be there when zoom doubles as first label
+        if ((start + firstLabelCoordinateIndex) % (step * 2) !== 0) {
+            let firstLabelX = (start + firstLabelCoordinateIndex - step) / (step * 2);
+            let xCoordinate = CHART_WIDTH * (x[firstLabelX] - x[start]) / (x[end] - x[start]);
+            let label = createSVGText(xLabels[firstLabelX], xCoordinate, 0);
+            add(xAxes, label);
         }
 
         for (let i = firstLabelCoordinateIndex; i < xCoordinates.length - 1; i += step) {
@@ -181,23 +190,23 @@ function createChart(data) {
         }
     }
 
-    function animateXLabels(oldStart, newStart, oldEnd, newEnd) {
+    function animateXLabels(zoom, newZoom, oldStart, newStart, oldEnd, newEnd) {
         let startMoved = oldStart !== newStart;
         let endMoved = oldEnd !== newEnd;
-        let startMovedLeft = oldStart > newStart;
-        let endMovedLeft = oldEnd > newEnd;
 
-        let _ = xAxes;
-        xAxes = xAxesHidden;
-        xAxesHidden = _;
+        if (!(startMoved && endMoved)) {
+            let _ = xAxes;
+            xAxes = xAxesHidden;
+            xAxesHidden = _;
 
-        addClass(xAxes, 'pending');
-        removeClass(xAxes, 'hidden', 'right')
-        addClass(xAxesHidden, 'hidden');
-        removeClass(xAxesHidden, 'pending', 'right');
-
-        if (endMoved && !endMovedLeft && !startMoved) {
-            addClass(xAxesHidden, 'right');
+            addClass(xAxes, 'pending', endMoved ? 'right' : '', newZoom > zoom ? 'even' : '');
+            removeClass(xAxes, endMoved ? '' : 'right', newZoom > zoom ? '' : 'even');
+            addClass(xAxesHidden, endMoved ? 'right' : '');
+            removeClass(xAxesHidden, 'even', newZoom > zoom ? 'pending' : '', endMoved ? '' : 'right');
+            setTimeout(() => {
+                removeClass(xAxes, 'hidden');
+                addClass(xAxesHidden, 'hidden');
+            }, 0)
         }
     }
 
@@ -270,6 +279,7 @@ function createChart(data) {
     }
 
     function buildXCoordinates() {
+        // TODO: no need to calculate max, min, we already know them
         return normalize(x.slice(start, end), CHART_WIDTH);
     }
 
@@ -299,18 +309,18 @@ function createChart(data) {
         animate.beginElement();
     }
 
-    function calculateZoom(start, end = x.length) {
+    function calculateZoom(start, end) {
         let partShown = Math.round(10 * (end - start) / x.length);
-        return Math.round(Math.log2(partShown)); // first time I used log in JS :)
+        return Math.round(Math.log2(partShown)); // wow, log2 in JS
     }
 
-    function getLabelsStep() {
+    function getXLabelsStep(zoom) {
         return Math.ceil(X_LABELS_STEP * Math.pow(2, zoom));
     }
 
-    function buildXLabels() {
+    function buildXLabels(zoom) {
         let labels = [];
-        let step = getLabelsStep();
+        let step = getXLabelsStep(zoom);
         for (let i = 0; i < x.length; i += step) {
             labels.push(toXLabel(x[i]));
         }
@@ -372,7 +382,7 @@ function createChart(data) {
 
     function createZeroYAxis() {
         let group = svgEl('g');
-        add(group, createAxisLine(10, CHART_WIDTH - 10, X_AXIS_PADDING, X_AXIS_PADDING), createSVGText('0', 5, -X_AXIS_PADDING));
+        add(group, createAxisLine(10, CHART_WIDTH - 10, X_AXIS_PADDING, X_AXIS_PADDING), createSVGText('0', 5, X_AXIS_PADDING + 15));
         return group;
     }
 

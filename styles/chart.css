@@ -19,24 +19,25 @@ svg > g {
     transition: 250ms;
 }
 
-g.hidden {
-    opacity: 0;
-}
-
-g.pending {
-    transition: 0s;
-}
-
 .x-axes {
     transform: scale(1, 1) translate(0, 100%);
 }
 
 .x-axes > text {
-    transition: .5s;
+    transition: .25s;
     text-anchor: middle;
 }
 
+.x-axes.pending > text:nth-child(odd) {
+    transition: 0s;
+}
+
+.x-axes.hidden.pending {
+    display: none;
+}
+
 .x-axes.hidden > text {
+    opacity: 0;
     transform: translateX(2%);
 }
 
@@ -44,12 +45,24 @@ g.pending {
     transform: translateX(-2%);
 }
 
-.x-axes.hidden > text:nth-child(odd) {
+.x-axes.hidden:not(.even) > text:nth-child(odd) {
+    display: none;
+}
+
+.x-axes.hidden.even > text:nth-child(even) {
     display: none;
 }
 
 .y-axes {
     transform: scale(1, 1) translateY(-20%);
+}
+
+.y-axes.hidden {
+    opacity: 0;
+}
+
+.y-axes.pending {
+    transition: 0s;
 }
 
 .y-axes.hidden.m-up {
@@ -58,11 +71,6 @@ g.pending {
 
 .y-axes.hidden.m-down {
     transform: scale(1, 0.5) translate(0, 100%);
-}
-
-/** zero axes */
-svg > g:first-of-type > text {
-    transform: scale(1, -1) translate(0, -1%);
 }
 
 @keyframes enter {

@@ -21,12 +21,12 @@ function svgAttrs(element, attributes = {}) {
 }
 
 function addClass(element, ...className) {
-    element.classList.add(...className);
+    element.classList.add(...(className.filter(_ => _)));
     return element;
 }
 
 function removeClass(element, ...className) {
-    element.classList.remove(...className);
+    element.classList.remove(...(className.filter(_ => _)));
 }
 
 function add(parent, ...children) {
