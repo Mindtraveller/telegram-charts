@@ -267,8 +267,7 @@ function createChart(data) {
 
     function normalizeAndDisplayPreview(lines, data, alpha) {
         let previewNormalized = customNormalize(data, newPreviewYMax, PREVIEW_HEIGHT);
-        let previewNormalizedOld = customNormalize(data, previewYMax, PREVIEW_HEIGHT);
-        drawLine(lines.preview, xPreviewCoordinates, previewNormalized, previewNormalizedOld, alpha);
+        drawPreviewLine(lines.preview, xPreviewCoordinates, previewNormalized, alpha);
     }
 
     function normalizeAndDisplay(lines, data, alpha) {
@@ -304,6 +303,15 @@ function createChart(data) {
         let from = x.reduce((acc, x, i) => acc + `${x.toFixed(2)},${oldY[i]} `, '');
         let to = x.reduce((acc, x, i) => acc + `${x.toFixed(2)},${y[i].toFixed(2)} `, '').trim();
         svgAttrs(animate, { from: from, to });
+        line.style.animationName = alpha ? 'enter' : 'exit';
+        animate.beginElement();
+    }
+
+    function drawPreviewLine(line, x, y, alpha = 1) {
+        let animate = line.firstChild;
+        let from = animate.getAttribute('to') || x.reduce((acc, x) => acc + `${x.toFixed(2)},0 `, '').trim();
+        let to = x.reduce((acc, x, i) => acc + `${x.toFixed(2)},${y[i].toFixed(2)} `, '').trim();
+        svgAttrs(animate, { from, to });
         line.style.animationName = alpha ? 'enter' : 'exit';
         animate.beginElement();
     }
