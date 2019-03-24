@@ -143,18 +143,20 @@ function createChart(data) {
         let axisStep = Math.ceil(newYMax * Y_AXES_PERCENT_CALCULATION / (NUMBER_Y_AXES - 1));
         let axes = Array.apply(null, Array(NUMBER_Y_AXES - 1)).map((_, i) => (i + 1) * axisStep);
         let normalizedAxes = customNormalize(axes, getMax(axes), CHART_HEIGHT * Y_AXES_PERCENT_CALCULATION, X_AXIS_PADDING);
-        clearChildren(yAxesGroupHidden);
 
+        let elements = yAxesGroupHidden.childNodes;
         normalizedAxes.forEach((y, i) => {
-            let line = createAxisLine(10, CHART_WIDTH - 10, y, y);
-            let text = createSVGText(axes[axes.length - i - 1], 5, y - 5 /** place text a bit above the line */);
-            add(yAxesGroupHidden, line, text);
+            svgAttrs(elements[i * 2], { y1: y, y2: y });
+            let text = elements[i * 2 + 1];
+            text.textContent = axes[axes.length - i - 1];
+            svgAttrs(text, { x: 5, y: y - 5 /** place text a bit above the line */ });
         });
 
         removeClass(yAxesGroupHidden, 'm-down', 'm-up');
         removeClass(yAxesGroupShown, 'm-down', 'm-up');
         addClass(yAxesGroupHidden, newYMax > yMax ? 'm-up' : 'm-down', 'pending');
         addClass(yAxesGroupShown, newYMax > yMax ? 'm-down' : 'm-up', 'pending');
+
         let _ = yAxesGroupHidden;
         yAxesGroupHidden = yAxesGroupShown;
         yAxesGroupShown = _;
@@ -180,12 +182,12 @@ function createChart(data) {
         if ((start + firstLabelCoordinateIndex) % (step * 2) !== 0) {
             let firstLabelX = (start + firstLabelCoordinateIndex - step) / (step * 2);
             let xCoordinate = CHART_WIDTH * (x[firstLabelX] - x[start]) / (x[end] - x[start]);
-            let label = createSVGText(xLabels[firstLabelX], xCoordinate, 0);
+            let label = createSVGText(xLabels[firstLabelX], xCoordinate, -2);
             add(xAxes, label);
         }
 
         for (let i = firstLabelCoordinateIndex; i < xCoordinates.length - 1; i += step) {
-            let label = createSVGText(xLabels[(start + i) / step], xCoordinates[i], 0);
+            let label = createSVGText(xLabels[(start + i) / step], xCoordinates[i], -2);
             add(xAxes, label);
         }
     }
@@ -341,7 +343,18 @@ function createChart(data) {
     }
 
     function createYAxes() {
-        return { yAxesGroupShown: svgEl('g', {}, 'y-axes'), yAxesGroupHidden: svgEl('g', {}, 'y-axes', 'hidden') };
+        let yAxesGroupShown = svgEl('g', {}, 'y-axes');
+        let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'hidden');
+
+        [yAxesGroupShown, yAxesGroupHidden].forEach(group => {
+            for (let i = 0; i < NUMBER_Y_AXES; i++) {
+                let line = createAxisLine(10, CHART_WIDTH - 10, 0, 0);
+                let text = createSVGText('', 5, 0);
+                add(group, line, text);
+            }
+        });
+
+        return { yAxesGroupShown, yAxesGroupHidden };
     }
 
     function createXAxes() {
@@ -391,7 +404,7 @@ function createChart(data) {
     }
 
     function createSVGText(text, x, y) {
-        let t = svgEl('text', { x, y });
+        let t = svgEl('text', { x, y, 'font-size': 13 });
         t.textContent = text;
         return t;
     }
