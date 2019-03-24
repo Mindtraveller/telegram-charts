@@ -45,13 +45,12 @@ function createChart(data) {
     let columnsToShow = chartData.columns;
 
     let xCoordinates = buildXCoordinates();
-    let xPreviewCoordinates = normalize(x, CHART_WIDTH);
+    let xPreviewCoordinates = normalizeX(x, CHART_WIDTH);
 
     let newYMax = calculateYMax(columnsToShow);
     let newPreviewYMax = calculatePreviewYMax(columnsToShow);
 
     let zoom = calculateZoom(start, end);
-    // let allXLabels = buildXLabels(zoom); // TODO: used them
     let xLabels = buildXLabels(zoom);
 
     let yAxesUpdateTimeout = null;
@@ -208,7 +207,7 @@ function createChart(data) {
             setTimeout(() => {
                 removeClass(xAxes, 'hidden');
                 addClass(xAxesHidden, 'hidden');
-            }, 0)
+            }, 0);
         }
     }
 
@@ -249,7 +248,6 @@ function createChart(data) {
         selectedPointInfo.style[fromRight ? 'left' : 'right'] = null;
         selectedPointInfo.style.display = 'block';
         selectedLine.style.display = 'block';
-
     }
 
     function calculatePreviewYMax(columns) {
@@ -257,7 +255,7 @@ function createChart(data) {
     }
 
     function calculateYMax(columns) {
-        return getMax(columns.reduce((acc, column) => acc.concat(column.data.slice(start, end)), []));
+        return getMax(columns.reduce((acc, column) => acc.concat(column.data.slice(start, end + 1)), []));
     }
 
     function displayData(updatePreview = false) {
@@ -274,20 +272,19 @@ function createChart(data) {
     }
 
     function normalizeAndDisplay(lines, data, alpha) {
-        let dataPart = data.slice(start, end);
+        let dataPart = data.slice(start, end + 1);
         let normalized = customNormalize(dataPart, newYMax, CHART_HEIGHT, X_AXIS_PADDING);
         let normalizedOld = customNormalize(dataPart, yMax, CHART_HEIGHT, X_AXIS_PADDING);
         drawLine(lines.chart, xCoordinates, normalized, normalizedOld, alpha);
     }
 
     function buildXCoordinates() {
-        // TODO: no need to calculate max, min, we already know them
-        return normalize(x.slice(start, end), CHART_WIDTH);
+        return normalizeX(x.slice(start, end + 1), CHART_WIDTH);
     }
 
-    function normalize(data, points) {
-        let min = Math.min(...data);
-        let max = getMax(data);
+    function normalizeX(data, points) {
+        let min = data[0];
+        let max = data[data.length - 1];
         let delta = Math.abs(max - min);
         return data.map(item => points * (item - min) / delta);
     }
@@ -304,9 +301,9 @@ function createChart(data) {
 
     function drawLine(line, x, y, oldY, alpha = 1) {
         let animate = line.firstChild;
-        let from = x.reduce((acc, x, i) => acc + `${x},${oldY[i]} `, '');
-        let to = x.reduce((acc, x, i) => acc + `${x},${y[i]} `, '');
-        svgAttrs(animate, { from, to });
+        let from = x.reduce((acc, x, i) => acc + `${x.toFixed(2)},${oldY[i]} `, '');
+        let to = x.reduce((acc, x, i) => acc + `${x.toFixed(2)},${y[i].toFixed(2)} `, '').trim();
+        svgAttrs(animate, { from: from, to });
         line.style.animationName = alpha ? 'enter' : 'exit';
         animate.beginElement();
     }

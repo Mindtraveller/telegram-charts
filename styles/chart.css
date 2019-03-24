@@ -17,7 +17,7 @@ g {
 }
 
 .x-axes > text {
-    transition: transform .25s;
+    transition: transform .25s, opacity .25s;
     text-anchor: middle;
 }
 

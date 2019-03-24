@@ -112,8 +112,8 @@ function createSlider(x, containerElement) {
 
     function emitBorderChange() {
         let borders = {
-            start: Math.max(0, Math.floor(NEXT_LEFT_BORDER * x.length / TOTAL_WIDTH)),
-            end: Math.min(x.length - 1, Math.round((TOTAL_WIDTH - NEXT_RIGHT_BORDER) * x.length / TOTAL_WIDTH)),
+            start: Math.max(0, Math.round(NEXT_LEFT_BORDER * x.length / TOTAL_WIDTH)),
+            end: Math.min(x.length - 1, Math.round((TOTAL_WIDTH - NEXT_RIGHT_BORDER) * (x.length - 1) / TOTAL_WIDTH)),
         }
 
         if (recentEmittedBorders.start === borders.start && recentEmittedBorders.end === borders.end) {
