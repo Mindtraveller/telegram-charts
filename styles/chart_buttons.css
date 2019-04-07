@@ -4,36 +4,59 @@
 }
 
 .buttons > button {
-    padding: 6px;
+    padding: 0 6px;
     margin-left: 10px;
-    font-size: 18px;
-    border: solid 1px #e6ecf0;
+    font-size: 16px;
+    border: solid 2px;
     border-radius: 25px;
+    position: relative;
+}
+
+.buttons > button > div {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    border-radius: 25px;
+    will-change: opacity;
+    transition: opacity 250ms;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .buttons > button > svg {
     border-radius: 100%;
-    border: solid 2px;
     pointer-events: none;
-    padding: 2px;
-    transition: background 250ms;
+    padding: 5px 0;
+    position: relative;
+    z-index: 10;
 }
 
 .buttons > button > span {
-    margin: 0 10px;
-    color: #43484b;
+    margin: 0 5px;
     line-height: 28px;
     pointer-events: none;
+    position: relative;
+    z-index: 10;
 }
 
 .buttons > button path {
     fill: white;
 }
 
-.buttons > button.m-hidden svg {
-    background: transparent !important;
+.buttons > button:not(.m-hidden) span {
+    color: white !important;
 }
 
-.buttons > button.m-hidden path {
+.buttons > button.m-hidden {
+    padding: 0 15px;
+}
+
+.buttons > button.m-hidden div {
+    opacity: 0;
+}
+
+.buttons > button.m-hidden svg {
     display: none;
 }

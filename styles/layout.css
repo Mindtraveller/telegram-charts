@@ -44,14 +44,6 @@ button {
     background: #384e63;
 }
 
-.dark .buttons > button > span {
-    color: #e2e6e8;
-}
-
-.dark .buttons > button {
-    border-color: #334659;
-}
-
 .dark .point-info {
     background: #253242;
     border-color: #202b39;

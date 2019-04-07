@@ -9,11 +9,14 @@ function createButtons(chartData, chartRootElement) {
 
     Object.keys(chartData.names).forEach(chart => {
         let button = el('button');
-        let icon = svgEl('svg', { width: '20', height: '20', viewBox: '0 0 24 24' });
-        icon.style.borderColor = chartData.colors[chart];
-        icon.style.background = chartData.colors[chart];
+        let div = el('div');
+        add(button, div);
+        button.style.borderColor = chartData.colors[chart];
+        div.style.background = chartData.colors[chart];
+        let icon = svgEl('svg', { width: '18', height: '18', viewBox: '0 0 24 24' });
         add(icon, svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' }));
         let span = el('span');
+        span.style.color = chartData.colors[chart];
         add(span, t(chartData.names[chart]));
         add(button, icon, span);
         button.dataset.chart = chart;
