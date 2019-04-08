@@ -28,7 +28,7 @@ function createChart(data) {
 
     let chartRootElement = el('div', 'chart-wrapper');
     let chartSVG = createChartElement()
-    let chart = createCanvas(CHART_WIDTH, CHART_HEIGHT + X_AXIS_PADDING)
+    let chart = createCanvas(CHART_WIDTH, CHART_HEIGHT)
     let { preview, previewContainer } = createPreview();
     let { buttons, visibilityMap } = createButtons(chartData, chartRootElement);
     let { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo();
@@ -276,7 +276,7 @@ function createChart(data) {
                 }
 
                 let dataPart = data.slice(start, end + 1)
-                let normalized = customNormalize(dataPart, oldYMax + (yDiff * progress), CHART_HEIGHT, X_AXIS_PADDING)
+                let normalized = customNormalize(dataPart, oldYMax + (yDiff * progress), CHART_HEIGHT)
                 drawChartLine(lines, xCoordinates, normalized, alpha)
 
                 let previewNormalized = customNormalize(data, oldPreviewYMax + (previewYDiff * progress),
@@ -300,7 +300,7 @@ function createChart(data) {
 
     function normalizeAndDisplay(lines, data, alpha) {
         let dataPart = data.slice(start, end + 1);
-        let normalized = customNormalize(dataPart, newYMax, CHART_HEIGHT, X_AXIS_PADDING);
+        let normalized = customNormalize(dataPart, newYMax, CHART_HEIGHT);
         drawChartLine(lines, xCoordinates, normalized, alpha)
     }
 

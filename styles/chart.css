@@ -4,14 +4,16 @@
     top: 0;
 }
 
-polyline,
+.chart-wrapper > canvas {
+    margin-bottom: 20px;
+}
+
 g,
 svg > line,
 circle {
     transform: scale(1, -1) translate(0, -100%);
 }
 
-polyline,
 circle {
     animation-iteration-count: 1;
     animation-duration: 250ms;
@@ -27,7 +29,7 @@ g {
 }
 
 .x-axes > text {
-    transition: transform .25s, opacity .25s;
+    transition: transform 125ms, opacity 125ms;
     text-anchor: middle;
 }
 
