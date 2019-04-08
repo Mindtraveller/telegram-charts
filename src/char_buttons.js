@@ -3,8 +3,7 @@ function createButtons(chartData, chartRootElement) {
     let longTouchTimeout = null
 
     let buttons = el('div', 'buttons');
-    on(buttons, 'mousedown', handleTouchStart)
-    on(buttons, 'touchstart', handleTouchStart)
+    on(buttons, isTouchDevice() ? 'touchstart' : 'mousedown', handleTouchStart)
 
     let visibilityMap = Object.keys(chartData.names).reduce((acc, chartName) => ({
         ...acc,
@@ -33,8 +32,7 @@ function createButtons(chartData, chartRootElement) {
             return
         }
 
-        on(buttons, 'touchend', handleTouchEnd)
-        on(buttons, 'mouseup', handleTouchEnd)
+        on(buttons, isTouchDevice() ? 'touchend' : 'mouseup', handleTouchEnd)
 
         longTouchTimeout = setTimeout(() => {
             handleLongTouch(chartToggled)
@@ -42,8 +40,7 @@ function createButtons(chartData, chartRootElement) {
     }
 
     function handleTouchEnd(event) {
-        off(buttons, 'touchend', handleTouchEnd)
-        off(buttons, 'mouseup', handleTouchEnd)
+        off(buttons, isTouchDevice() ? 'touchend' : 'mouseup', handleTouchEnd)
 
         if (longTouchTimeout) {
             clearTimeout(longTouchTimeout)
