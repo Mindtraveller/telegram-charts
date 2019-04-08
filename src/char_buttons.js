@@ -1,6 +1,10 @@
 function createButtons(chartData, chartRootElement) {
+    let LONG_TOUCH_DURATION = 300
+    let longTouchTimeout = null
+
     let buttons = el('div', 'buttons');
-    on(buttons, 'click', handleButtonClick);
+    on(buttons, 'mousedown', handleTouchStart)
+    on(buttons, 'touchstart', handleTouchStart)
 
     let visibilityMap = Object.keys(chartData.names).reduce((acc, chartName) => ({
         ...acc,
@@ -23,8 +27,48 @@ function createButtons(chartData, chartRootElement) {
         add(buttons, button);
     });
 
+    function handleTouchStart(event) {
+        let chartToggled = event.target.dataset.chart
+        if (!chartToggled) {
+            return
+        }
+
+        on(buttons, 'touchend', handleTouchEnd)
+        on(buttons, 'mouseup', handleTouchEnd)
+
+        longTouchTimeout = setTimeout(() => {
+            handleLongTouch(chartToggled)
+        }, LONG_TOUCH_DURATION)
+    }
+
+    function handleTouchEnd(event) {
+        off(buttons, 'touchend', handleTouchEnd)
+        off(buttons, 'mouseup', handleTouchEnd)
+
+        if (longTouchTimeout) {
+            clearTimeout(longTouchTimeout)
+            longTouchTimeout = null
+            handleButtonClick(event)
+        }
+    }
+
+    function handleLongTouch(chartToggled) {
+        longTouchTimeout = null
+
+        visibilityMap = {
+            [chartToggled]: true,
+        };
+
+        [...buttons.childNodes].forEach(button =>
+          !visibilityMap[button.dataset.chart] ? addClass(button, 'm-hidden') : removeClass(button, 'm-hidden')
+        )
+
+        emit(chartRootElement, 'visibility-updated', visibilityMap)
+    }
+
     function handleButtonClick(event) {
-        let chartToggled = event.target.dataset.chart;
+        let button = event.target
+        let chartToggled = button.dataset.chart
         if (!chartToggled) {
             return;
         }
@@ -36,6 +80,9 @@ function createButtons(chartData, chartRootElement) {
 
         // do not allow to hide all charts
         if (!Object.values(newVisibilityMap).some(value => value)) {
+            button.style.animationName = null
+            void button.offsetWidth
+            button.style.animationName = 'shake'
             return
         }
 

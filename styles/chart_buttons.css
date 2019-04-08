@@ -10,6 +10,8 @@
     border: solid 2px;
     border-radius: 25px;
     position: relative;
+    animation-duration: .8s;
+    transform: translateZ(0);
 }
 
 .buttons > button > div {
@@ -59,4 +61,22 @@
 
 .buttons > button.m-hidden svg {
     display: none;
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%, 80% {
+        transform: translate3d(1px, 0, 0);
+    }
+
+    30%, 50%, 70% {
+        transform: translate3d(-3px, 0, 0);
+    }
+
+    40%, 60% {
+        transform: translate3d(3px, 0, 0);
+    }
 }

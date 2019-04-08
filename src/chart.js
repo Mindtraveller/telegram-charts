@@ -258,10 +258,9 @@ function createChart(data) {
     }
 
     function animateVisibilityChange(newColumnsToShow, oldColumns, newYMax, oldYMax, newPreviewYMax, oldPreviewYMax) {
-        let isAdding = newColumnsToShow.length > columnsToShow.length
         let yDiff = newYMax - oldYMax
         let previewYDiff = newPreviewYMax - oldPreviewYMax
-        let columnsToUse = isAdding ? newColumnsToShow : oldColumns
+        let columnsToUse = newColumnsToShow.length >= columnsToShow.length ? newColumnsToShow : oldColumns
 
         scheduleAnimation(progress => {
             clearCharts()
@@ -269,9 +268,9 @@ function createChart(data) {
                 let lines = chartData.lines[columnName]
                 let alpha = 1
 
-                if (isAdding && !oldColumns.find(column => column.name === columnName)) {
+                if (!oldColumns.find(column => column.name === columnName)) {
                     alpha = Math.min(1, progress * 2)
-                } else if (!isAdding && !visibilityMap[columnName]) {
+                } else if (!visibilityMap[columnName]) {
                     alpha = Math.max(0, 1 - (progress * 2))
                 }
 
