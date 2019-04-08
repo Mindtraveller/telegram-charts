@@ -1,3 +1,9 @@
+.chart-wrapper > svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
 polyline,
 g,
 svg > line,

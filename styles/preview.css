@@ -35,7 +35,7 @@
 
 .slider__bar {
     position: absolute;
-    width: 6px;
+    width: 8px;
     height: 100%;
     background: #aeb7bd;
     opacity: 0.5;
