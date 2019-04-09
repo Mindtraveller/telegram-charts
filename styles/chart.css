@@ -8,13 +8,8 @@
     margin-bottom: 20px;
 }
 
-g,
-svg > line,
 circle {
     transform: scale(1, -1) translate(0, -100%);
-}
-
-circle {
     animation-iteration-count: 1;
     animation-duration: 250ms;
     animation-fill-mode: forwards;
@@ -22,10 +17,6 @@ circle {
 
 g {
     fill: #96a2aa;
-}
-
-.x-axes {
-    transform: scale(1, 1) translate(0, 100%);
 }
 
 .x-axes > text {
@@ -60,7 +51,6 @@ g {
 
 .y-axes {
     transition: transform .25s, opacity .125s;
-    transform: scale(1, 1) translateY(-20%);
 }
 
 .y-axes.hidden {

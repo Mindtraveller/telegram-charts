@@ -9,10 +9,9 @@ function createChart(data) {
     let PREVIEW_LINE_WEIGHT = 1
     let ANIMATION_TIME = 250
 
-    let X_AXIS_PADDING = 20;
+    let X_AXIS_PADDING = 15;
 
-    let NUMBER_Y_AXES = 5;
-    let Y_AXES_PERCENT_CALCULATION = 0.95; // this allows axes to be positioned a bit bellow the top border of chart
+    let NUMBER_Y_AXES = 6
 
     let ZOOM_STEP = 10 * CHART_WIDTH / MAX_CHART_WIDTH;
     let X_LABELS_MAX_NUMBER = 6; // desired number, not concrete one :)
@@ -34,9 +33,9 @@ function createChart(data) {
     let { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo();
     let { xAxes, xAxesHidden } = createXAxes();
     let { yAxesGroupShown, yAxesGroupHidden } = createYAxes();
-    let selectedLine = createAxisLine(0, 0, X_AXIS_PADDING, X_AXIS_PADDING + CHART_HEIGHT);
+    let selectedLine = createAxisLine(0, 0, 0, CHART_HEIGHT);
 
-    add(chartSVG, createZeroYAxis(), selectedLine, yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden)
+    add(chartSVG, selectedLine, yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden)
     add(chartRootElement, chart, chartSVG, previewContainer, buttons, selectedPointInfo)
 
     let start = 0;
@@ -138,16 +137,16 @@ function createChart(data) {
             return
         }
 
-        let axisStep = Math.ceil(newYMax * Y_AXES_PERCENT_CALCULATION / (NUMBER_Y_AXES - 1));
-        let axes = Array.apply(null, Array(NUMBER_Y_AXES - 1)).map((_, i) => (i + 1) * axisStep);
-        let normalizedAxes = customNormalize(axes, getMax(axes), CHART_HEIGHT * Y_AXES_PERCENT_CALCULATION, X_AXIS_PADDING);
+        let axisStep = Math.ceil(newYMax / NUMBER_Y_AXES)
+        let axes = Array.apply(null, Array(NUMBER_Y_AXES)).map((_, i) => i * axisStep)
+        let normalizedAxes = customNormalize(axes, newYMax, CHART_HEIGHT)
 
         let elements = yAxesGroupHidden.childNodes;
-        normalizedAxes.forEach((y, i) => {
-            svgAttrs(elements[i * 2], { y1: y, y2: y });
+        normalizedAxes.reverse().forEach((y, i) => {
+            svgAttrs(elements[i * 2], { y1: CHART_HEIGHT - y, y2: CHART_HEIGHT - y })
             let text = elements[i * 2 + 1];
             text.textContent = axes[axes.length - i - 1];
-            svgAttrs(text, { x: 5, y: y - 5 /** place text a bit above the line */ });
+            svgAttrs(text, { x: 5, y: CHART_HEIGHT - y - 5 /** place text a bit above the line */ })
         });
 
         removeClass(yAxesGroupHidden, 'm-down', 'm-up');
@@ -180,12 +179,12 @@ function createChart(data) {
         if ((start + firstLabelCoordinateIndex) % (step * 2) !== 0) {
             let firstLabelX = (start + firstLabelCoordinateIndex - step) / (step * 2);
             let xCoordinate = CHART_WIDTH * (x[firstLabelX] - x[start]) / (x[end] - x[start]);
-            let label = createSVGText(xLabels[firstLabelX], xCoordinate, -2);
+            let label = createSVGText(xLabels[firstLabelX], xCoordinate, CHART_HEIGHT + X_AXIS_PADDING);
             add(xAxes, label);
         }
 
         for (let i = firstLabelCoordinateIndex; i < xCoordinates.length - 1; i += step) {
-            let label = createSVGText(xLabels[(start + i) / step], xCoordinates[i], -2);
+            let label = createSVGText(xLabels[(start + i) / step], xCoordinates[i], CHART_HEIGHT + X_AXIS_PADDING);
             add(xAxes, label);
         }
     }
