@@ -69,6 +69,7 @@ function createDoubleYLineChart(chartRootElement, data) {
   yMax = newYMax
 
   on(chartRootElement, 'visibility-updated', ({ detail: newMap }) => {
+    let oldVisibilityMap = visibilityMap
     visibilityMap = newMap
     let newColumnsToShow = chartData.columns.filter(column => visibilityMap[column.name])
 
@@ -76,7 +77,7 @@ function createDoubleYLineChart(chartRootElement, data) {
 
     animateVisibilityChange(newColumnsToShow, columnsToShow, yMax)
 
-    displayDoubleYAxes(yMax, newYMax)
+    displayDoubleYAxes(yMax, newYMax, oldVisibilityMap)
 
     yMax = newYMax
     columnsToShow = newColumnsToShow
@@ -105,7 +106,7 @@ function createDoubleYLineChart(chartRootElement, data) {
     if (!yAxesUpdateTimeout) {
       let _yMax = yMax
       yAxesUpdateTimeout = setTimeout(() => {
-        displayDoubleYAxes(_yMax, newYMax)
+        displayDoubleYAxes(_yMax, newYMax, visibilityMap)
         yAxesUpdateTimeout = null
       }, ANIMATION_TIME)
     }
@@ -132,7 +133,7 @@ function createDoubleYLineChart(chartRootElement, data) {
     }
   })
 
-  function displayDoubleYAxes(yMax, newYMax) {
+  function displayDoubleYAxes(yMax, newYMax, oldVisibilityMap) {
     eachColumn(chartData.columns, (data, name) => {
       let isRight = name === 'y1' // =(
 
@@ -141,6 +142,10 @@ function createDoubleYLineChart(chartRootElement, data) {
 
       if (!visibilityMap[name]) {
         addClass(shownGroup, 'hidden', 'm-down')
+        return
+      }
+
+      if (newYMax[name] === yMax[name] && oldVisibilityMap[name] && visibilityMap[name]) {
         return
       }
 
@@ -242,7 +247,7 @@ function createDoubleYLineChart(chartRootElement, data) {
     svgAttrs(selectedLine, { x1: xCoordinate, x2: xCoordinate })
 
     eachColumn(chartData.columns, (data, lineName) => {
-      let y = customNormalize([data[selectedXIndex]], yMax, CHART_HEIGHT, X_AXIS_PADDING)[0]
+      let y = customNormalize([data[selectedXIndex]], yMax[lineName], CHART_HEIGHT, X_AXIS_PADDING)[0]
       let point = chartData.lines[lineName].chartPoint
       point.style.animationName = visibilityMap[lineName] ? 'enter' : 'exit'
       svgAttrs(point, { cx: xCoordinate })
