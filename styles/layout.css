@@ -15,16 +15,26 @@ button {
 }
 
 .dark {
-    background: #242f3f;
+    background: rgb(36, 47, 61);
 }
 
 .dark h1 {
     color: white;
 }
 
-.dark text,
 .dark line {
-    fill: #546778;
+    fill: #FFFFFF;
+    stroke-opacity: .2;
+}
+
+.dark .x-axes {
+    fill: #A3B1C2;
+    opacity: .6;
+}
+
+.dark .y-axes {
+    fill: #A3B1C2;
+    opacity: .6;
 }
 
 .dark circle {
@@ -45,15 +55,15 @@ button {
 }
 
 .dark .point-info {
-    background: #253242;
+    background: rgb(29, 37, 50);
     border-color: #202b39;
 }
 
 .dark .point-info {
     color: white;
-    -webkit-box-shadow: 0px 0px 4px 2px #202b39;
-    -moz-box-shadow: 0px 0px 4px 2px #202b39;
-    box-shadow: 0px 0px 4px 2px #202b39;
+    -webkit-box-shadow: 0px 0px 2px 1px #202b39;
+    -moz-box-shadow: 0px 0px 2px 1px #202b39;
+    box-shadow: 0px 0px 2px 1px #202b39;
 }
 
 .layout-container {

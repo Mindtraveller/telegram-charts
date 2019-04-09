@@ -32,7 +32,7 @@ function createSelectedPointInfo(chartData) {
   let chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
     let div = el('div', 'info')
     let value = el('span')
-    value.style.color = chartData.colors[chart]
+    value.style.color = TOOLTIP_COLORS[chartData.colors[chart]]
     acc[chart] = value
     add(div, t(chartName), value)
     add(chartInfoContainer, div)

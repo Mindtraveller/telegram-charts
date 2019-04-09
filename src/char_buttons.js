@@ -14,12 +14,13 @@ function createButtons(chartData, chartRootElement) {
         let button = el('button');
         let div = el('div');
         add(button, div);
-        button.style.borderColor = chartData.colors[chart];
-        div.style.background = chartData.colors[chart];
+        const buttonColor = BUTTON_COLORS[chartData.colors[chart]];
+        button.style.borderColor = buttonColor
+        div.style.background = buttonColor
         let icon = svgEl('svg', { width: '18', height: '18', viewBox: '0 0 24 24' });
         add(icon, svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' }));
         let span = el('span');
-        span.style.color = chartData.colors[chart];
+        span.style.color = buttonColor
         add(span, t(chartData.names[chart]));
         add(button, icon, span);
         button.dataset.chart = chart;

@@ -20,8 +20,14 @@ circle {
     animation-fill-mode: forwards;
 }
 
-g {
-    fill: #96a2aa;
+line {
+    fill: #182D3B;
+    stroke-opacity: .2;
+}
+
+.x-axes,
+.y-axes {
+    fill: #8E8E93;
 }
 
 .x-axes > text {
@@ -67,11 +73,11 @@ g {
 }
 
 .y-axes.hidden.m-up {
-    transform: scale(1, 0.5) translate(0, -100%);
+    transform: scale(1, 0.5) translate(0, -50%);
 }
 
 .y-axes.hidden.m-down {
-    transform: scale(1, 0.7) translate(0, 50%);
+    transform: scale(1, 0.5) translate(0, 100%);
 }
 
 @keyframes enter {

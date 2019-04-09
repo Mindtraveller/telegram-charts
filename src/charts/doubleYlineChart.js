@@ -263,11 +263,10 @@ function createDoubleYLineChart(chartRootElement, data) {
     })
 
     pointDate.innerText = new Date(xValue).toString().slice(0, 15)
-    let fromRight = xCoordinate > CHART_WIDTH / 2
-    selectedPointInfo.style[fromRight ? 'right' : 'left'] = `${fromRight ? CHART_WIDTH - xCoordinate : xCoordinate}px`
-    selectedPointInfo.style[fromRight ? 'left' : 'right'] = null
-    selectedPointInfo.style.display = 'block'
-    selectedLine.style.display = 'block'
+      let fromRight = xCoordinate > CHART_WIDTH / 2
+      selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 180: xCoordinate) + 'px)'
+      selectedPointInfo.style.display = 'block'
+      selectedLine.style.display = 'block'
   }
 
   function calculatePreviewYMax(columns) {
@@ -297,12 +296,12 @@ function createDoubleYLineChart(chartRootElement, data) {
 
         if (toBeAdded) {
           alpha = Math.min(1, progress * 2)
-          previewHeight = previewHeight * progress
-          chartHeight = chartHeight * progress
+          previewHeight = previewHeight * (1 + (1 - progress))
+          chartHeight = chartHeight * (1 + (1 - progress))
         } else if (toBeRemoved) {
           alpha = Math.max(0, 1 - (progress * 2))
-          chartHeight = chartHeight - (chartHeight * progress)
-          previewHeight = previewHeight - (previewHeight * progress)
+          chartHeight = chartHeight + (chartHeight * progress)
+          previewHeight = previewHeight + (previewHeight * progress)
         }
 
         let dataPart = data.slice(start, end + 1)
