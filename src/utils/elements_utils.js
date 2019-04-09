@@ -30,7 +30,7 @@ function removeClass(element, ...className) {
 }
 
 function add(parent, ...children) {
-    children.forEach(child => parent.appendChild(child));
+    children.filter(node => !!node).forEach(child => parent.appendChild(child));
 }
 
 function on(element, eventName, callback) {
