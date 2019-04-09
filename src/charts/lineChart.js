@@ -28,7 +28,7 @@ function createLineChart(chartRootElement, data) {
   let chart = createCanvas(CHART_WIDTH, CHART_HEIGHT)
   let { preview, previewContainer } = createPreview()
   let { buttons, visibilityMap } = createButtons(chartData, chartRootElement)
-  let { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo()
+  let { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo(chartData)
   let { xAxes, xAxesHidden } = createXAxes()
   let { yAxesGroupShown, yAxesGroupHidden } = createYAxes()
 
@@ -240,7 +240,7 @@ function createLineChart(chartRootElement, data) {
       pointChartValues[lineName].parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
-    pointDate.innerText = new Date(xValue).toString().slice(0, 10)
+    pointDate.innerText = new Date(xValue).toString().slice(0, 15)
     let fromRight = xCoordinate > CHART_WIDTH / 2
     selectedPointInfo.style[fromRight ? 'right' : 'left'] = `${fromRight ? CHART_WIDTH - xCoordinate : xCoordinate}px`
     selectedPointInfo.style[fromRight ? 'left' : 'right'] = null
@@ -438,23 +438,5 @@ function createLineChart(chartRootElement, data) {
     let chart = createCanvas(PREVIEW_WIDTH, PREVIEW_HEIGHT)
     add(container, chart, createSlider(x, chartRootElement))
     return { previewContainer: container, preview: chart }
-  }
-
-  function createSelectedPointInfo() {
-    let info = el('div', 'point-info')
-    let chartInfoContainer = el('div', 'charts-info')
-    let date = el('div')
-    add(info, date, chartInfoContainer)
-    let chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
-      let div = el('div', 'info')
-      div.style.color = chartData.colors[chart]
-      let value = el('span')
-      acc[chart] = value
-      add(div, value, t(chartName))
-      add(chartInfoContainer, div)
-      return acc
-    }, {})
-
-    return { selectedPointInfo: info, pointChartValues: chartValues, pointDate: date }
   }
 }

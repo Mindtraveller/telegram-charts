@@ -126,13 +126,12 @@ function createSlider(x, containerElement) {
 
     function createSlider() {
         let slider = el('div', 'slider');
-        let leftBar = el('div', 'slider__bar');
+        let leftBar = el('div', 'slider__bar', 'left');
         let rightBar = el('div', 'slider__bar', 'right');
-        add(slider, leftBar, rightBar);
         return { slider, leftBar, rightBar };
     }
 
     let sliderContainer = el('div', 'slider-container');
-    add(sliderContainer, leftShadow, slider, rightShadow);
+    add(sliderContainer, leftShadow, leftBar, slider, rightBar, rightShadow);
     return sliderContainer;
 }

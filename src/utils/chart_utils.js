@@ -23,3 +23,21 @@ function drawLine(canvas, x, y, color, alpha = 1, width = 1) {
   }
   context.stroke()
 }
+
+function createSelectedPointInfo(chartData) {
+  let info = el('div', 'point-info')
+  let chartInfoContainer = el('div', 'charts-info')
+  let date = el('div')
+  add(info, date, chartInfoContainer)
+  let chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
+    let div = el('div', 'info')
+    let value = el('span')
+    value.style.color = chartData.colors[chart]
+    acc[chart] = value
+    add(div, t(chartName), value)
+    add(chartInfoContainer, div)
+    return acc
+  }, {})
+
+  return { selectedPointInfo: info, pointChartValues: chartValues, pointDate: date }
+}

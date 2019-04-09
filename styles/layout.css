@@ -32,16 +32,16 @@ button {
 }
 
 .dark .shadow {
-    background: #1f2a38;
-    opacity: 0.7;
+    background: #304259;
+    opacity: 0.6;
 }
 
 .dark .slider {
-    border-color: #40566b;
+    border-color: #56626D;
 }
 
 .dark .slider__bar {
-    background: #384e63;
+    background: #56626D;
 }
 
 .dark .point-info {
@@ -49,8 +49,11 @@ button {
     border-color: #202b39;
 }
 
-.dark .point-info > div:first-child {
+.dark .point-info {
     color: white;
+    -webkit-box-shadow: 0px 0px 4px 2px #202b39;
+    -moz-box-shadow: 0px 0px 4px 2px #202b39;
+    box-shadow: 0px 0px 4px 2px #202b39;
 }
 
 .layout-container {

@@ -1,6 +1,8 @@
 .preview-container {
     position: relative;
     margin: 0 10px;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .slider-container {
@@ -14,29 +16,52 @@
 
 .shadow {
     position: relative;
-    background: #d3d3d3;
-    opacity: 0.3;
+    background: #E2EEF9;
+    opacity: 0.6;
 }
 
-.left {
+.shadow.left {
     left: 0;
+    margin-right: -5px;
+    padding-right: 5px;
 }
 
-.right {
+.shadow.right {
     right: 0;
+    margin-left: -5px;
+    padding-left: 5px;
 }
 
 .slider {
     position: relative;
     flex-grow: 1;
-    border-top: 1px solid #e0eaf0;
-    border-bottom: 1px solid #e0eaf0;
+    border-top: 1px solid #C0D1E1;
+    border-bottom: 1px solid #C0D1E1;
 }
 
 .slider__bar {
-    position: absolute;
-    width: 8px;
+    position: relative;
+    width: 10px;
     height: 100%;
-    background: #aeb7bd;
-    opacity: 0.5;
+    background: #C0D1E1;
+    z-index: 1;
+}
+
+.slider__bar:before {
+    content: '|';
+    position:absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%) translateY(-50%);
+    color: #fff;
+    width: 2px;
+    font-size: 13px;
+}
+
+.slider__bar.right {
+    border-radius: 0 5px 5px 0;
+}
+
+.slider__bar.left {
+    border-radius: 5px 0 0 5px;
 }
