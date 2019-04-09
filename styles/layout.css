@@ -4,8 +4,8 @@ body {
 }
 
 h1 {
-    font-size: 24px;
-    margin: 0 10px 30px;
+    font-size: 18px;
+    margin: 0 10px 10px;
 }
 
 button {
@@ -54,16 +54,14 @@ button {
 }
 
 .layout-container {
-    max-width: 500px;
+    max-width: 400px;
     display: block;
     margin: 0 auto;
     padding: 30px 0;
 }
 
 .charts-container > .chart-wrapper {
-    position: relative;
     margin-bottom: 30px;
-    overflow: hidden;
 }
 
 .buttons {

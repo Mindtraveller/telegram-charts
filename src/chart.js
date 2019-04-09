@@ -1,8 +1,8 @@
-function createChart(data) {
+function createChart(data, index) {
     let chartsContainer = d.getElementById('charts-container');
-    let MAX_CHART_WIDTH = 500;
+    let MAX_CHART_WIDTH = 400;
     let CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth); // same width for preview as well
-    let CHART_HEIGHT = 400;
+    let CHART_HEIGHT = 350;
     let PREVIEW_WIDTH = CHART_WIDTH - 20
     let PREVIEW_HEIGHT = 50;
     let CHART_LINE_WEIGHT = 2
@@ -34,9 +34,13 @@ function createChart(data) {
     let { xAxes, xAxesHidden } = createXAxes();
     let { yAxesGroupShown, yAxesGroupHidden } = createYAxes();
     let selectedLine = createAxisLine(0, 0, 0, CHART_HEIGHT);
+    let title = el('h1')
+    add(title, t('Chart #' + index))
+    let chartContainer = el('div', 'charts')
 
+    add(chartContainer, chart, chartSVG, previewContainer, selectedPointInfo)
     add(chartSVG, selectedLine, yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden)
-    add(chartRootElement, chart, chartSVG, previewContainer, buttons, selectedPointInfo)
+    add(chartRootElement, title, chartContainer, buttons)
 
     let start = 0;
     let end = x.length;

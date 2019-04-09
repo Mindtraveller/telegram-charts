@@ -1,10 +1,15 @@
-.chart-wrapper > svg {
+.charts {
+    position: relative;
+    overflow: hidden;
+}
+
+.charts > svg {
     position: absolute;
     left: 0;
     top: 0;
 }
 
-.chart-wrapper > canvas {
+.charts > canvas {
     margin-bottom: 20px;
 }
 
