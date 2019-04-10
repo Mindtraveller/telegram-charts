@@ -44,15 +44,17 @@ function createLineChart(chartRootElement, data) {
     let end = x.length
     let selectedXIndex = -1
 
+    let yMin = 0
     let yMax = 0
+    let previewYMin = 0
     let previewYMax = 0
     let columnsToShow = chartData.columns
 
     let xCoordinates = buildXCoordinates()
     let xPreviewCoordinates = normalizeX(x, CHART_WIDTH)
 
-    let newYMax = calculateYMax(columnsToShow)
-    let newPreviewYMax = calculatePreviewYMax(columnsToShow)
+    let { max: newYMax, min: newYMin } = calculateYMinMax(columnsToShow)
+    let { max: newPreviewYMax, min: newPreviewYMin } = calculatePreviewYMax(columnsToShow)
 
     let zoom = calculateZoom(start, end)
     let xLabels = buildXLabels(zoom)
@@ -61,25 +63,27 @@ function createLineChart(chartRootElement, data) {
 
     createChartLines()
 
-    displayData(true)
-    displayYAxes(yMax, newYMax)
+    displayPreviewData()
 
-    yMax = newYMax
     previewYMax = newPreviewYMax
+    previewYMin = newPreviewYMin
 
     on(chartRootElement, 'visibility-updated', ({ detail: newMap }) => {
         visibilityMap = newMap
         let newColumnsToShow = chartData.columns.filter(column => visibilityMap[column.name])
 
-        newYMax = calculateYMax(newColumnsToShow)
-        newPreviewYMax = calculatePreviewYMax(newColumnsToShow)
+        let { max: newYMax, min: newYMin } = calculateYMinMax(newColumnsToShow)
+        let { max: newPreviewYMax, min: newPreviewYMin } = calculatePreviewYMax(newColumnsToShow)
 
-        animateVisibilityChange(newColumnsToShow, columnsToShow, newYMax, yMax, newPreviewYMax, previewYMax)
+        animateVisibilityChange(newColumnsToShow, columnsToShow, newYMax, yMax, newYMin, yMin)
+        animatePreviewVisibilityChange(newColumnsToShow, columnsToShow, newPreviewYMax, previewYMax, newPreviewYMin, previewYMin)
 
-        displayYAxes(yMax, newYMax)
+        displayYAxes(yMax, newYMax, yMin, newYMin)
 
         yMax = newYMax
+        yMin = newYMin
         previewYMax = newPreviewYMax
+        previewYMin = newPreviewYMin
         columnsToShow = newColumnsToShow
 
         displaySelectedPoint()
@@ -100,18 +104,23 @@ function createLineChart(chartRootElement, data) {
         end = newEnd
         xCoordinates = buildXCoordinates()
 
-        newYMax = calculateYMax(columnsToShow)
+        let minMax = calculateYMinMax(columnsToShow)
+        newYMin = minMax.min
+        newYMax = minMax.max
+
         displayData()
 
         if (!yAxesUpdateTimeout) {
             let _yMax = yMax
+            let _yMin = yMin
             yAxesUpdateTimeout = setTimeout(() => {
-                displayYAxes(_yMax, newYMax)
+                displayYAxes(_yMax, newYMax, _yMin, newYMin)
                 yAxesUpdateTimeout = null
             }, ANIMATION_TIME)
         }
 
         yMax = newYMax
+        yMin = newYMin
 
         displayXAxes()
         displaySelectedPoint()
@@ -133,14 +142,14 @@ function createLineChart(chartRootElement, data) {
         }
     })
 
-    function displayYAxes(yMax, newYMax) {
-        if (newYMax === yMax) {
+    function displayYAxes(yMax, newYMax, yMin, newYMin) {
+        if (newYMax === yMax && yMin === newYMin) {
             return
         }
 
-        let axisStep = Math.ceil(newYMax / NUMBER_Y_AXES)
-        let axes = Array.apply(null, Array(NUMBER_Y_AXES)).map((_, i) => i * axisStep)
-        let normalizedAxes = customNormalize(axes, newYMax, CHART_HEIGHT)
+        let axisStep = Math.ceil((newYMax - newYMin) / NUMBER_Y_AXES)
+        let axes = Array.apply(null, Array(NUMBER_Y_AXES)).map((_, i) => newYMin + i * axisStep)
+        let normalizedAxes = customNormalize(axes, newYMax, CHART_HEIGHT, 0, newYMin)
 
         let elements = yAxesGroupHidden.childNodes
         normalizedAxes.reverse().forEach((y, i) => {
@@ -225,7 +234,7 @@ function createLineChart(chartRootElement, data) {
         svgAttrs(selectedLine, { x1: xCoordinate, x2: xCoordinate })
 
         eachColumn(chartData.columns, (data, lineName) => {
-            let y = customNormalize([data[selectedXIndex]], yMax, CHART_HEIGHT, X_AXIS_PADDING)[0]
+            let y = customNormalize([data[selectedXIndex]], yMax, CHART_HEIGHT, X_AXIS_PADDING, yMin)[0]
             let point = chartData.lines[lineName].chartPoint
             point.style.animationName = visibilityMap[lineName] ? 'enter' : 'exit'
             svgAttrs(point, { cx: xCoordinate })
@@ -248,20 +257,22 @@ function createLineChart(chartRootElement, data) {
     }
 
     function calculatePreviewYMax(columns) {
-        return getMax(columns.reduce((acc, column) => acc.concat(column.data), []))
+        let allData = columns.reduce((acc, column) => acc.concat(column.data), [])
+        return { max: getMax(allData), min: getMin(allData) }
     }
 
-    function calculateYMax(columns) {
-        return getMax(columns.reduce((acc, column) => acc.concat(column.data.slice(start, end + 1)), []))
+    function calculateYMinMax(columns) {
+        let allData = columns.reduce((acc, column) => acc.concat(column.data.slice(start, end + 1)), [])
+        return { max: getMax(allData), min: getMin(allData) }
     }
 
-    function animateVisibilityChange(newColumnsToShow, oldColumns, newYMax, oldYMax, newPreviewYMax, oldPreviewYMax) {
+    function animateVisibilityChange(newColumnsToShow, oldColumns, newYMax, oldYMax, newYMin, oldYMin) {
         let yDiff = newYMax - oldYMax
-        let previewYDiff = newPreviewYMax - oldPreviewYMax
+        let yMinDiff = newYMin - oldYMin
         let columnsToUse = newColumnsToShow.length >= columnsToShow.length ? newColumnsToShow : oldColumns
 
         scheduleAnimation(progress => {
-            clearCharts()
+            clearCanvas(chart)
             eachColumn(columnsToUse, (data, columnName) => {
                 let lines = chartData.lines[columnName]
                 let alpha = 1
@@ -273,31 +284,57 @@ function createLineChart(chartRootElement, data) {
                 }
 
                 let dataPart = data.slice(start, end + 1)
-                let normalized = customNormalize(dataPart, oldYMax + (yDiff * progress), CHART_HEIGHT)
+                let normalized = customNormalize(dataPart, oldYMax + (yDiff * progress), CHART_HEIGHT, 0,
+                  oldYMin + (yMinDiff * progress))
                 drawChartLine(lines, xCoordinates, normalized, alpha)
+            })
+        }, ANIMATION_TIME)
+    }
 
-                let previewNormalized = customNormalize(data, oldPreviewYMax + (previewYDiff * progress),
-                    PREVIEW_HEIGHT)
+    function animatePreviewVisibilityChange(newColumnsToShow, oldColumns, newYMax, oldYMax, newYMin, oldYMin) {
+        let yDiff = newYMax - oldYMax
+        let yMinDiff = newYMin - oldYMin
+        let columnsToUse = newColumnsToShow.length >= columnsToShow.length ? newColumnsToShow : oldColumns
+
+        scheduleAnimation(progress => {
+            clearCanvas(preview)
+            eachColumn(columnsToUse, (data, columnName) => {
+                let lines = chartData.lines[columnName]
+                let alpha = 1
+
+                if (!oldColumns.find(column => column.name === columnName)) {
+                    alpha = Math.min(1, progress * 2)
+                } else if (!visibilityMap[columnName]) {
+                    alpha = Math.max(0, 1 - (progress * 2))
+                }
+
+                let previewNormalized = customNormalize(data, oldYMax + (yDiff * progress),
+                  PREVIEW_HEIGHT, 0, oldYMin + (yMinDiff * progress))
                 drawPreviewLine(lines, xPreviewCoordinates, previewNormalized, alpha)
             })
         }, ANIMATION_TIME)
     }
 
-    function displayData(updatePreview = false) {
+    function displayData() {
         eachColumn(columnsToShow, (data, lineName) => {
             normalizeAndDisplay(chartData.lines[lineName], data)
-            updatePreview && normalizeAndDisplayPreview(chartData.lines[lineName], data)
+        })
+    }
+
+    function displayPreviewData() {
+        eachColumn(columnsToShow, (data, lineName) => {
+            normalizeAndDisplayPreview(chartData.lines[lineName], data)
         })
     }
 
     function normalizeAndDisplayPreview(lines, data, alpha) {
-        let previewNormalized = customNormalize(data, newPreviewYMax, PREVIEW_HEIGHT)
+        let previewNormalized = customNormalize(data, newPreviewYMax, PREVIEW_HEIGHT, 0, newPreviewYMin)
         drawPreviewLine(lines, xPreviewCoordinates, previewNormalized, alpha)
     }
 
     function normalizeAndDisplay(lines, data, alpha) {
         let dataPart = data.slice(start, end + 1)
-        let normalized = customNormalize(dataPart, newYMax, CHART_HEIGHT)
+        let normalized = customNormalize(dataPart, newYMax, CHART_HEIGHT, 0, newYMin)
         drawChartLine(lines, xCoordinates, normalized, alpha)
     }
 
@@ -312,8 +349,8 @@ function createLineChart(chartRootElement, data) {
         return data.map(item => points * (item - min) / delta)
     }
 
-    function customNormalize(data, max, points, padding = 0) {
-        return data.map(item => !max ? padding : (points * item / max) + padding)
+    function customNormalize(data, max, points, padding = 0, min = 0) {
+        return data.map(item => !max ? padding : (points * (item - min) / (max - min)) + padding)
     }
 
     function clearChildren(element) {
@@ -328,11 +365,6 @@ function createLineChart(chartRootElement, data) {
 
     function drawPreviewLine(line, x, y, alpha = 1) {
         drawLine(preview, x, y, line.color, alpha, PREVIEW_LINE_WEIGHT)
-    }
-
-    function clearCharts() {
-        clearCanvas(chart)
-        clearCanvas(preview)
     }
 
     function calculateZoom(start, end) {
@@ -364,6 +396,10 @@ function createLineChart(chartRootElement, data) {
 
     function getMax(data) {
         return Math.max(...data)
+    }
+
+    function getMin(data) {
+        return Math.min(...data)
     }
 
     function createYAxes() {

@@ -47,13 +47,13 @@ function createDoubleYLineChart(chartRootElement, data) {
   let end = x.length
   let selectedXIndex = -1
 
-  let yMax = 0
   let columnsToShow = chartData.columns
-
   let xCoordinates = buildXCoordinates()
+
   let xPreviewCoordinates = normalizeX(x, CHART_WIDTH)
 
-  let newYMax = calculateYMax(columnsToShow)
+  let yMax = { y0: { min: 0, max: 0 }, y1: { min: 0, max: 0 } }
+  let newYMax = calculateYMinMax(columnsToShow)
   calculatePreviewYMax(columnsToShow)
 
   let zoom = calculateZoom(start, end)
@@ -63,17 +63,14 @@ function createDoubleYLineChart(chartRootElement, data) {
 
   createChartLines()
 
-  displayData(true)
-  displayDoubleYAxes(yMax, newYMax)
-
-  yMax = newYMax
+  displayPreviewData()
 
   on(chartRootElement, 'visibility-updated', ({ detail: newMap }) => {
     let oldVisibilityMap = visibilityMap
     visibilityMap = newMap
     let newColumnsToShow = chartData.columns.filter(column => visibilityMap[column.name])
 
-    newYMax = calculateYMax(chartData.columns)
+    newYMax = calculateYMinMax(chartData.columns)
 
     animateVisibilityChange(newColumnsToShow, columnsToShow, yMax)
 
@@ -100,7 +97,7 @@ function createDoubleYLineChart(chartRootElement, data) {
     end = newEnd
     xCoordinates = buildXCoordinates()
 
-    newYMax = calculateYMax(columnsToShow)
+    newYMax = calculateYMinMax(columnsToShow)
     displayData()
 
     if (!yAxesUpdateTimeout) {
@@ -145,13 +142,17 @@ function createDoubleYLineChart(chartRootElement, data) {
         return
       }
 
-      if (newYMax[name] === yMax[name] && oldVisibilityMap[name] && visibilityMap[name]) {
+      if (
+        newYMax[name].max === yMax[name].max &&
+        newYMax[name].min === yMax[name].min &&
+        oldVisibilityMap[name] && visibilityMap[name]
+      ) {
         return
       }
 
-      let axisStep = Math.ceil(newYMax[name] / NUMBER_Y_AXES)
-      let axes = Array.apply(null, Array(NUMBER_Y_AXES)).map((_, i) => i * axisStep)
-      let normalizedAxes = customNormalize(axes, newYMax[name], CHART_HEIGHT).reverse()
+      let axisStep = Math.ceil((newYMax[name].max - newYMax[name].min) / NUMBER_Y_AXES)
+      let axes = Array.apply(null, Array(NUMBER_Y_AXES)).map((_, i) => newYMax[name].min + i * axisStep)
+      let normalizedAxes = customNormalize(axes, newYMax[name].max, CHART_HEIGHT, 0, newYMax[name].min).reverse()
 
       let leftElements = yAxesGroupHidden.childNodes
       let rightElements = yAxesRightGroupHidden.childNodes
@@ -166,8 +167,8 @@ function createDoubleYLineChart(chartRootElement, data) {
 
       removeClass(hiddenGroup, 'm-down', 'm-up')
       removeClass(shownGroup, 'm-down', 'm-up')
-      addClass(hiddenGroup, newYMax[name] > yMax[name] ? 'm-up' : 'm-down', 'pending')
-      addClass(shownGroup, newYMax[name] > yMax[name] ? 'm-down' : 'm-up', 'pending')
+      addClass(hiddenGroup, newYMax[name].max > yMax[name].max ? 'm-up' : 'm-down', 'pending')
+      addClass(shownGroup, newYMax[name].max > yMax[name].max ? 'm-down' : 'm-up', 'pending')
 
       if (!isRight) {
         let _ = hiddenGroup
@@ -247,7 +248,8 @@ function createDoubleYLineChart(chartRootElement, data) {
     svgAttrs(selectedLine, { x1: xCoordinate, x2: xCoordinate })
 
     eachColumn(chartData.columns, (data, lineName) => {
-      let y = customNormalize([data[selectedXIndex]], yMax[lineName], CHART_HEIGHT, X_AXIS_PADDING)[0]
+      let y = customNormalize([data[selectedXIndex]], yMax[lineName].max, CHART_HEIGHT, X_AXIS_PADDING,
+        yMax[lineName].min)[0]
       let point = chartData.lines[lineName].chartPoint
       point.style.animationName = visibilityMap[lineName] ? 'enter' : 'exit'
       svgAttrs(point, { cx: xCoordinate })
@@ -270,12 +272,13 @@ function createDoubleYLineChart(chartRootElement, data) {
   }
 
   function calculatePreviewYMax(columns) {
-    columns.forEach(column => column.yMax = getMax(column.data))
+    columns.forEach(column => column.yMax = { max: getMax(column.data), min: getMin(column.data) })
   }
 
-  function calculateYMax(columns) {
+  function calculateYMinMax(columns) {
     return columns.reduce((acc, column) => {
-      acc[column.name] = getMax(column.data.slice(start, end + 1))
+      let data = column.data.slice(start, end + 1)
+      acc[column.name] = { max: getMax(data), min: getMin(data) }
       return acc
     }, {})
   }
@@ -288,7 +291,6 @@ function createDoubleYLineChart(chartRootElement, data) {
       eachColumn(columnsToUse, (data, columnName, column) => {
         let lines = chartData.lines[columnName]
         let alpha = 1
-        let previewYMax = column.yMax
         let previewHeight = PREVIEW_HEIGHT
         let chartHeight = CHART_HEIGHT
         let toBeAdded = !oldColumns.find(column => column.name === columnName)
@@ -305,30 +307,35 @@ function createDoubleYLineChart(chartRootElement, data) {
         }
 
         let dataPart = data.slice(start, end + 1)
-        let normalized = customNormalize(dataPart, yMax[columnName], chartHeight)
+        let normalized = customNormalize(dataPart, yMax[columnName].max, chartHeight, 0, yMax[columnName].min)
         drawChartLine(lines, xCoordinates, normalized, alpha)
 
-        let previewNormalized = customNormalize(data, previewYMax, previewHeight)
+        let previewNormalized = customNormalize(data, column.yMax.max, previewHeight, 0, column.yMax.min)
         drawPreviewLine(lines, xPreviewCoordinates, previewNormalized, alpha)
       })
     }, ANIMATION_TIME)
   }
 
-  function displayData(updatePreview = false) {
+  function displayPreviewData() {
+    eachColumn(columnsToShow, (data, name, column) => {
+      normalizeAndDisplayPreview(chartData.lines[name], data, column.yMax)
+    })
+  }
+
+  function displayData() {
     eachColumn(columnsToShow, (data, name, column) => {
       normalizeAndDisplay(chartData.lines[name], data, newYMax[name])
-      updatePreview && normalizeAndDisplayPreview(chartData.lines[name], data, column.yMax)
     })
   }
 
   function normalizeAndDisplayPreview(line, data, max, alpha) {
-    let previewNormalized = customNormalize(data, max, PREVIEW_HEIGHT)
+    let previewNormalized = customNormalize(data, max.max, PREVIEW_HEIGHT, 0, max.min)
     drawPreviewLine(line, xPreviewCoordinates, previewNormalized, alpha)
   }
 
   function normalizeAndDisplay(lines, data, max, alpha) {
     let dataPart = data.slice(start, end + 1)
-    let normalized = customNormalize(dataPart, max, CHART_HEIGHT)
+    let normalized = customNormalize(dataPart, max.max, CHART_HEIGHT, 0, max.min)
     drawChartLine(lines, xCoordinates, normalized, alpha)
   }
 
@@ -343,8 +350,8 @@ function createDoubleYLineChart(chartRootElement, data) {
     return data.map(item => points * (item - min) / delta)
   }
 
-  function customNormalize(data, max, points, padding = 0) {
-    return data.map(item => !max ? padding : (points * item / max) + padding)
+  function customNormalize(data, max, points, padding = 0, min = 0) {
+    return data.map(item => !max ? padding : (points * (item - min) / (max - min)) + padding)
   }
 
   function clearChildren(element) {
@@ -395,6 +402,10 @@ function createDoubleYLineChart(chartRootElement, data) {
 
   function getMax(data) {
     return Math.max(...data)
+  }
+
+  function getMin(data) {
+    return Math.min(...data)
   }
 
   function createDoubleYAxes() {
