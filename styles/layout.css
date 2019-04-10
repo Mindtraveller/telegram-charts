@@ -3,11 +3,6 @@ body {
     font-family: "Helvetica Neue", sans-serif;
 }
 
-h1 {
-    font-size: 18px;
-    margin: 0 10px 10px;
-}
-
 button {
     background: #0000;
     border: none;
@@ -16,10 +11,6 @@ button {
 
 .dark {
     background: rgb(36, 47, 61);
-}
-
-.dark h1 {
-    color: white;
 }
 
 .dark line {

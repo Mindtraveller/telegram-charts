@@ -1,0 +1,21 @@
+.chart-info {
+    margin: 0 10px 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.chart-info > h1 {
+    margin: 0;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.chart-info > .selected-range {
+    font-size: 14px;
+    text-align: right;
+}
+
+.dark .chart-info > h1,
+.dark .chart-info > .selected-range {
+    color: white;
+}
