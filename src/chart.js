@@ -5,7 +5,7 @@ function createChart(data, index) {
   let info = el('div', 'chart-info')
   let title = el('h1')
   let selectedRange = el('div', 'selected-range')
-  let from = el('span', 'range-from')
+  let from = el('div', 'range-from')
   let to = el('span', 'range-to')
   add(selectedRange, from, t(' - '), to)
   add(title, t('Chart #' + index))
@@ -22,10 +22,35 @@ function createChart(data, index) {
 
   add(chartsContainer, chartRootElement)
 
+  let ANIMATION_TIME = 250
+  let animationTimeout = null
   let x = data.columns[0].slice(1)
+  let prevStart = -1
+  let prevEnd = -1
+  let newStart = -1
+  let newEnd = -1
+
   on(chartRootElement, 'border-changed', ({ detail: { start, end } }) => {
-    from.textContent = formatDate(x[start])
-    to.textContent = formatDate(x[end])
+    newStart = start
+    newEnd = end
+
+    if (!animationTimeout) {
+      animationTimeout = setTimeout(() => {
+        animationTimeout = null
+
+        if (newStart !== prevStart) {
+          prevStart = newStart
+          from.textContent = formatDate(x[prevStart])
+          applyAnimation(from, 'time-change')
+        }
+
+        if (newEnd !== prevEnd) {
+          prevEnd = newEnd
+          to.textContent = formatDate(x[prevEnd])
+          applyAnimation(to, 'time-change')
+        }
+      }, ANIMATION_TIME)
+    }
   })
 
   function formatDate(timestamp) {
