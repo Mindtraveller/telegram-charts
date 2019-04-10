@@ -9,5 +9,6 @@ const TOOLTIP_COLORS = {
     '#FE3C30': '#F34C44',
     '#4BD964': '#3CC23F',
     '#108BE3': '#108BE3',
-    '#E8AF14': '#E4AE1B'
+    '#E8AF14': '#E4AE1B',
+    '#64ADED': '#3896E8'
 }

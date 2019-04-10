@@ -17,11 +17,21 @@ function drawLine(canvas, x, y, color, alpha = 1, width = 1) {
   context.globalAlpha = alpha
   context.strokeStyle = color
   context.lineWidth = width
-  context.moveTo(x[0], y[0])
+  context.moveTo(Math.round(x[0]), Math.round(y[0]))
   for (let i = 1; i < x.length; i++) {
-    context.lineTo(x[i], y[i])
+    context.lineTo(Math.round(x[i]), Math.round(y[i]))
   }
   context.stroke()
+}
+
+function drawBars(canvas, x, y, color, width) {
+  let context = canvas.getContext('2d')
+  context.beginPath()
+  context.fillStyle = color
+  for (let i = 0; i < x.length; i++) {
+    context.rect(x[i], 0, Math.ceil(width), Math.round(y[i]));
+  }
+  context.fill()
 }
 
 function createSelectedPointInfo(chartData) {
