@@ -72,7 +72,7 @@ function createDoubleYLineChart(chartRootElement, data) {
 
     newYMax = calculateYMinMax(chartData.columns)
 
-    animateVisibilityChange(newColumnsToShow, columnsToShow, yMax)
+    animateVisibilityChange(newColumnsToShow, columnsToShow, newYMax)
 
     displayDoubleYAxes(yMax, newYMax, oldVisibilityMap)
 
@@ -138,11 +138,13 @@ function createDoubleYLineChart(chartRootElement, data) {
       let shownGroup = isRight ? yAxesRightGroupShown : yAxesGroupShown
 
       if (!visibilityMap[name]) {
-        addClass(shownGroup, 'hidden', 'm-down')
+        removeClass(shownGroup, 'm-down')
+        addClass(shownGroup, 'hidden', 'm-up')
         return
       }
 
       if (
+        yMax[name] &&
         newYMax[name].max === yMax[name].max &&
         newYMax[name].min === yMax[name].min &&
         oldVisibilityMap[name] && visibilityMap[name]
@@ -167,8 +169,8 @@ function createDoubleYLineChart(chartRootElement, data) {
 
       removeClass(hiddenGroup, 'm-down', 'm-up')
       removeClass(shownGroup, 'm-down', 'm-up')
-      addClass(hiddenGroup, newYMax[name].max > yMax[name].max ? 'm-up' : 'm-down', 'pending')
-      addClass(shownGroup, newYMax[name].max > yMax[name].max ? 'm-down' : 'm-up', 'pending')
+      addClass(hiddenGroup, yMax[name] && newYMax[name].max > yMax[name].max ? 'm-up' : 'm-down', 'pending')
+      addClass(shownGroup, yMax[name] && newYMax[name].max > yMax[name].max ? 'm-down' : 'm-up', 'pending')
 
       if (!isRight) {
         let _ = hiddenGroup

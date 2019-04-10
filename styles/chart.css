@@ -61,7 +61,7 @@ line {
 }
 
 .y-axes {
-    transition: transform .25s, opacity .125s;
+    transition: transform .25s, opacity .25s;
 }
 
 .y-axes.hidden {
