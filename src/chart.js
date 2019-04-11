@@ -16,6 +16,8 @@ function createChart(data, index) {
     createDoubleYLineChart(chartRootElement, data)
   } else if (data.types.y0 === 'bar') {
     createBarChart(chartRootElement, data)
+  } else if (data.types.y0 === 'area') {
+    createPercentageStackedAreaChart(chartRootElement, data)
   } else {
     createLineChart(chartRootElement, data)
   }

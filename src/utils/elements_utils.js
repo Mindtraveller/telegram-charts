@@ -50,3 +50,9 @@ function applyAnimation(element, animationName) {
   void element.offsetWidth
   element.style.animationName = animationName
 }
+
+function clearChildren(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild)
+  }
+}

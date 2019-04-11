@@ -34,6 +34,22 @@ function drawBars(canvas, x, y, color, width) {
   context.fill()
 }
 
+function drawStackedArea(canvas, x, y, color) {
+  let context = canvas.getContext('2d')
+  context.beginPath()
+  context.fillStyle = color
+  context.strokeStyle = color
+  context.lineWidth = 1
+  context.moveTo(Math.round(x[0]), Math.floor(y[0]))
+  for (let i = 1; i < x.length; i++) {
+    context.lineTo(Math.round(x[i]), Math.floor(y[i * 2]))
+  }
+  for (let i = x.length - 1; i >= 0; i--) {
+    context.lineTo(Math.round(x[i]), Math.ceil(y[i * 2 + 1]))
+  }
+  context.fill()
+}
+
 function createSelectedPointInfo(chartData) {
   let info = el('div', 'point-info')
   let chartInfoContainer = el('div', 'charts-info')
@@ -42,9 +58,12 @@ function createSelectedPointInfo(chartData) {
   let chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
     let div = el('div', 'info')
     let value = el('span')
+    let subValue = el('span')
     value.style.color = TOOLTIP_COLORS[chartData.colors[chart]]
-    acc[chart] = value
-    add(div, t(chartName), value)
+    acc[chart] = { value, subValue }
+    let name = el('span', 'name')
+    add(name, t(chartName))
+    add(div, subValue, name, value)
     add(chartInfoContainer, div)
     return acc
   }, {})

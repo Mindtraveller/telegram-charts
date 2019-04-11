@@ -1,11 +1,13 @@
 .buttons,
 .buttons > button {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .buttons > button {
     padding: 0 6px;
     margin-left: 10px;
+    margin-bottom: 10px;
     font-size: 16px;
     border: solid 2px;
     border-radius: 25px;

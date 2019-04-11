@@ -262,8 +262,8 @@ function createDoubleYLineChart(chartRootElement, data) {
       })
       animate.beginElement()
 
-      pointChartValues[lineName].innerText = data[selectedXIndex]
-      pointChartValues[lineName].parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
+      pointChartValues[lineName].value.innerText = data[selectedXIndex]
+      pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
     pointDate.innerText = new Date(xValue).toString().slice(0, 15)
@@ -354,12 +354,6 @@ function createDoubleYLineChart(chartRootElement, data) {
 
   function customNormalize(data, max, points, padding = 0, min = 0) {
     return data.map(item => !max ? padding : (points * (item - min) / (max - min)) + padding)
-  }
-
-  function clearChildren(element) {
-    while (element.firstChild) {
-      element.removeChild(element.firstChild)
-    }
   }
 
   function drawChartLine(line, x, y, alpha = 1) {

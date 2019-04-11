@@ -17,7 +17,7 @@
 }
 
 .point-info > div:first-child {
-    font-weight: 500;
+    font-weight: bold;
 }
 
 .charts-info {
@@ -32,6 +32,18 @@
     display: flex;
     justify-content: space-between;
     margin-top: 5px;
+}
+
+.info > .name {
+    flex-grow: 1;
+    text-align: start;
+    font-weight: normal;
+}
+
+.info > span:first-child {min-width: 30px;text-align: right;padding-right: 5px;}
+
+.info > span:first-child:empty {
+    display: none;
 }
 
 .info > span {

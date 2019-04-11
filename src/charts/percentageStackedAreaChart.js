@@ -1,15 +1,15 @@
-function createBarChart(chartRootElement, data) {
+function createPercentageStackedAreaChart(chartRootElement, data) {
   let MAX_CHART_WIDTH = 400
-  let CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth) // same width for preview as well
+  let CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth)
   let CHART_HEIGHT = 350
+  let CHART_HEIGHT_GAP = 20
   let PREVIEW_WIDTH = CHART_WIDTH - 20
   let PREVIEW_HEIGHT = 50
-
-  let ANIMATION_TIME = 250
+  let ANIMATION_TIME = 150
 
   let X_AXIS_PADDING = 20
 
-  let NUMBER_Y_AXES = 6
+  let NUMBER_Y_AXES = 5
 
   let ZOOM_STEP = 10 * CHART_WIDTH / MAX_CHART_WIDTH
   let X_LABELS_MAX_NUMBER = 6 // desired number, not concrete one :)
@@ -26,38 +26,50 @@ function createBarChart(chartRootElement, data) {
   let chartSVG = createChartElement()
   let chart = createCanvas(CHART_WIDTH, CHART_HEIGHT)
   let { preview, previewContainer } = createPreview()
+  let { buttons, visibilityMap } = createButtons(chartData, chartRootElement)
   let { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo(chartData)
   let { xAxes, xAxesHidden } = createXAxes()
   let { yAxesGroupShown, yAxesGroupHidden } = createYAxes()
 
+  let selectedLine = createAxisLine(0, 0, 0, CHART_HEIGHT)
   let chartContainer = el('div', 'charts')
 
   add(chartContainer, chart, chartSVG, previewContainer, selectedPointInfo)
-  add(chartSVG, createYLines(), yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden)
+  add(chartSVG, selectedLine, createYLines(), yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden)
 
-  add(chartRootElement, chartContainer)
+  add(chartRootElement, chartContainer, buttons)
 
   let start = 0
   let end = x.length
   let selectedXIndex = -1
 
-  let yMax = 0
   let columnsToShow = chartData.columns
 
   let xCoordinates = buildXCoordinates()
   let xPreviewCoordinates = normalizeX(x, CHART_WIDTH)
 
-  let newYMax = calculateYMax(columnsToShow)
-  let newPreviewYMax = calculatePreviewYMax(columnsToShow)
-
   let zoom = calculateZoom(start, end)
   let xLabels = buildXLabels(zoom)
 
-  let yAxesUpdateTimeout = null
-
   createChartLines()
 
-  displayData(true)
+  let percentage = calculatePercentage(columnsToShow)
+  displayPreviewData(percentage)
+  displayYAxes()
+
+  on(chartRootElement, 'visibility-updated', ({ detail: newMap }) => {
+    visibilityMap = newMap
+    let newColumnsToShow = chartData.columns.filter(column => visibilityMap[column.name])
+
+    let newPercentage = calculatePercentage(newColumnsToShow)
+
+    animateVisibilityChange(newColumnsToShow, columnsToShow, newPercentage, percentage)
+
+    percentage = newPercentage
+    columnsToShow = newColumnsToShow
+
+    displaySelectedPoint()
+  })
 
   on(chartRootElement, 'border-changed', ({ detail: { start: newStart, end: newEnd } }) => {
     let newZoom = calculateZoom(newStart, newEnd)
@@ -74,31 +86,17 @@ function createBarChart(chartRootElement, data) {
     end = newEnd
     xCoordinates = buildXCoordinates()
 
-    newYMax = calculateYMax(columnsToShow)
-    displayData()
-
-    if (!yAxesUpdateTimeout) {
-      let _yMax = yMax
-      yAxesUpdateTimeout = setTimeout(() => {
-        displayYAxes(_yMax, newYMax)
-        yAxesUpdateTimeout = null
-      }, ANIMATION_TIME)
-    }
-
-    yMax = newYMax
+    displayData(percentage)
 
     displayXAxes()
     displaySelectedPoint()
   })
 
   on(chartSVG, 'click', event => {
-    let step = CHART_WIDTH / xCoordinates.length
+    let step = xCoordinates[1] / 2
     let newIndex = start + Math.max(0, xCoordinates.findIndex(xCoordinate => xCoordinate + step > event.offsetX))
     if (newIndex !== selectedXIndex) {
       selectedXIndex = newIndex
-
-      clearCanvas(chart)
-      displayData()
       displaySelectedPoint()
     }
   })
@@ -106,24 +104,17 @@ function createBarChart(chartRootElement, data) {
   on(d, 'click', event => {
     if (!chartRootElement.contains(event.target)) {
       selectedXIndex = -1
-
-      clearCanvas(chart)
-      displayData()
       displaySelectedPoint()
     }
   })
 
-  function displayYAxes(yMax, newYMax) {
-    if (newYMax === yMax) {
-      return
-    }
-
-    let axisStep = Math.ceil(newYMax / NUMBER_Y_AXES)
+  function displayYAxes() {
+    let axisStep = Math.ceil(100 / (NUMBER_Y_AXES - 1))
     let axes = Array.apply(null, Array(NUMBER_Y_AXES)).map((_, i) => i * axisStep)
-    let normalizedAxes = customNormalize(axes, newYMax, CHART_HEIGHT)
+    let normalizedAxes = customNormalize(axes, 100, CHART_HEIGHT - CHART_HEIGHT_GAP).reverse()
 
     let elements = yAxesGroupHidden.childNodes
-    normalizedAxes.reverse().forEach((y, i) => {
+    normalizedAxes.forEach((y, i) => {
       let text = elements[i]
       text.textContent = axes[axes.length - i - 1]
       svgAttrs(text, { x: 5, y: CHART_HEIGHT - y - 5 /** place text a bit above the line */ })
@@ -131,8 +122,8 @@ function createBarChart(chartRootElement, data) {
 
     removeClass(yAxesGroupHidden, 'm-down', 'm-up')
     removeClass(yAxesGroupShown, 'm-down', 'm-up')
-    addClass(yAxesGroupHidden, newYMax > yMax ? 'm-up' : 'm-down', 'pending')
-    addClass(yAxesGroupShown, newYMax > yMax ? 'm-down' : 'm-up', 'pending')
+    addClass(yAxesGroupHidden, 'm-up', 'pending')
+    addClass(yAxesGroupShown, 'm-down', 'pending')
 
     let _ = yAxesGroupHidden
     yAxesGroupHidden = yAxesGroupShown
@@ -191,63 +182,136 @@ function createBarChart(chartRootElement, data) {
 
   function displaySelectedPoint() {
     if (selectedXIndex === -1 || selectedXIndex < start || selectedXIndex > end) {
+      selectedLine.style.display = 'none'
       selectedPointInfo.style.display = 'none'
       return
     }
 
     let xValue = x[selectedXIndex]
     let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end] - x[start])
+    svgAttrs(selectedLine, { x1: xCoordinate, x2: xCoordinate })
+
+    let sum = chartData.columns.reduce((acc, column) => acc + (visibilityMap[column.name] ? column.data[selectedXIndex] : 0), 0)
 
     eachColumn(chartData.columns, (data, lineName) => {
+      pointChartValues[lineName].subValue.innerText = Math.round(data[selectedXIndex] / sum * 100) + '%'
       pointChartValues[lineName].value.innerText = data[selectedXIndex]
-      pointChartValues[lineName].value.parentElement.style.display = 'flex'
+      pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
     pointDate.innerText = new Date(xValue).toString().slice(0, 15)
     let fromRight = xCoordinate > CHART_WIDTH / 2
-    selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 180: xCoordinate) + 'px)'
+    selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 180 : xCoordinate) + 'px)'
     selectedPointInfo.style.display = 'block'
+    selectedLine.style.display = 'block'
   }
 
-  function calculatePreviewYMax(columns) {
-    return getMax(columns.reduce((acc, column) => acc.concat(column.data), []))
+  function calculatePercentage(columns) {
+    let result = columns.reduce((acc, column) => {
+      acc[column.name] = []
+      return acc
+    }, {})
+    for (let i = 0; i < x.length; i++) {
+      let total = columns.reduce((acc, column) => acc + column.data[i], 0)
+      for (let c = 0; c < columns.length; c++) {
+        let column = columns[c]
+        let prevColumn = columns[c - 1]
+        let nextColumn = columns[c + 1]
+        let bottomValue = prevColumn ? result[prevColumn.name][i * 2 + 1] : 0
+        let topValue = !nextColumn ? 1 : bottomValue + (column.data[i] / total)
+        result[column.name].push(bottomValue);
+        result[column.name].push(topValue);
+      }
+    }
+
+    return result
   }
 
-  function calculateYMax(columns) {
-    return getMax(columns.reduce((acc, column) => acc.concat(column.data.slice(start, end + 1)), []))
+  function animateVisibilityChange(newColumnsToShow, oldColumns, newPercentage, oldPercentage) {
+    let columnsToUse = newColumnsToShow.length >= columnsToShow.length ? newColumnsToShow : oldColumns
+
+    scheduleAnimation(progress => {
+      clearCanvas(chart)
+      clearCanvas(preview)
+
+      for (let c = 0; c < columnsToUse.length; c++) {
+        let name = columnsToUse[c].name
+        let line = chartData.lines[name]
+        let toBeAdded = !oldColumns.find(column => column.name === name)
+        let toBeRemoved = !visibilityMap[name]
+        let prevColumn = columnsToUse[c - 1]
+        let nextColumn = columnsToUse[c + 1]
+
+        let dataPart = []
+
+        if (toBeAdded) {
+          let prevColumnNextData = prevColumn ? newPercentage[prevColumn.name] : null
+          let prevColumnPrevData = prevColumn ? oldPercentage[prevColumn.name] : null
+          let nextColumnNextData = nextColumn ? newPercentage[nextColumn.name] : null
+          let nextColumnPrevData = nextColumn ? oldPercentage[nextColumn.name] : null
+          dataPart = newPercentage[name].slice(0)
+
+          for (let i = 0; i < dataPart.length - 1; i += 2) {
+            dataPart[i] = prevColumnNextData ?
+              prevColumnPrevData[i + 1] + (prevColumnNextData[i + 1] - prevColumnPrevData[i + 1]) * progress :
+              0
+            dataPart[i + 1] = nextColumnNextData ?
+              nextColumnPrevData[i] + (nextColumnNextData[i] - nextColumnPrevData[i]) * progress :
+              1
+          }
+        } else if (toBeRemoved) {
+          let prevColumnNextData = prevColumn ? newPercentage[prevColumn.name] : null
+          let prevColumnPrevData = prevColumn ? oldPercentage[prevColumn.name] : null
+          let nextColumnNextData = nextColumn ? newPercentage[nextColumn.name] : null
+          let nextColumnPrevData = nextColumn ? oldPercentage[nextColumn.name] : null
+          dataPart = oldPercentage[name].slice(0)
+
+          for (let i = 0; i < dataPart.length - 1; i += 2) {
+            dataPart[i] = prevColumnPrevData && prevColumnNextData ?
+              prevColumnPrevData[i + 1] + (prevColumnNextData[i + 1] - prevColumnPrevData[i + 1]) * progress :
+              prevColumnPrevData ? prevColumnPrevData[i + 1] + (1 - prevColumnPrevData[i + 1]) * progress : 0
+
+            dataPart[i + 1] = nextColumnPrevData && nextColumnNextData ?
+              nextColumnPrevData[i] + (nextColumnNextData[i] - (nextColumnPrevData[i] || 1)) * progress :
+              nextColumnPrevData ? nextColumnPrevData[i] - nextColumnPrevData[i] * progress : 1
+          }
+        } else {
+          dataPart = newPercentage[name].slice(0)
+          let oldValues = oldPercentage[name]
+
+          for (let i = 0; i < dataPart.length - 1; i += 2) {
+            dataPart[i] = oldValues[i] + (dataPart[i] - oldValues[i]) * progress
+            dataPart[i + 1] = oldValues[i + 1] + (dataPart[i + 1] - oldValues[i + 1]) * progress
+          }
+        }
+
+        normalizeAndDisplay(line, dataPart)
+        normalizeAndDisplayPreview(line, dataPart)
+      }
+    }, ANIMATION_TIME)
   }
 
-  function displayData(updatePreview = false) {
-    eachColumn(columnsToShow, (data, lineName) => {
-      normalizeAndDisplay(chartData.lines[lineName], data)
-      updatePreview && normalizeAndDisplayPreview(chartData.lines[lineName], data)
+  function displayData(percentage) {
+    eachColumn(columnsToShow, (_, lineName) => {
+      normalizeAndDisplay(chartData.lines[lineName], percentage[lineName])
     })
   }
 
-  function normalizeAndDisplayPreview(lines, data, alpha) {
-    let previewNormalized = customNormalize(data, newPreviewYMax, PREVIEW_HEIGHT)
-    drawPreviewLine(lines, xPreviewCoordinates, previewNormalized, alpha)
+  function displayPreviewData(percentage) {
+    eachColumn(columnsToShow, (_, lineName) => {
+      normalizeAndDisplayPreview(chartData.lines[lineName], percentage[lineName])
+    })
+  }
+
+  function normalizeAndDisplayPreview(line, data) {
+    let previewNormalized = customNormalize(data, 1, PREVIEW_HEIGHT)
+    drawPreviewLine(line, xPreviewCoordinates, previewNormalized)
   }
 
   function normalizeAndDisplay(lines, data) {
-    let dataPart = data.slice(start, end + 1)
-    let normalized = customNormalize(dataPart, newYMax, CHART_HEIGHT)
-    let width = CHART_WIDTH / xCoordinates.length
-
-
-    if (selectedXIndex === -1) {
-      drawChartLine(lines.color, xCoordinates, normalized, width)
-      return
-    }
-
-    if (selectedXIndex >= start && selectedXIndex <= end) {
-      drawChartLine('#8cbef5', xCoordinates.slice(0, selectedXIndex - start), normalized.slice(0, selectedXIndex - start), width)
-      drawChartLine('#8cbef5', xCoordinates.slice(selectedXIndex - start + 1), normalized.slice(selectedXIndex - start + 1), width)
-      drawChartLine('#558DED', [xCoordinates[selectedXIndex - start]], [normalized[selectedXIndex - start]], width)
-      return
-    }
-
-    drawChartLine('#8cbef5', xCoordinates, normalized, width)
+    let dataPart = data.slice(start * 2, end * 2 + 2)
+    let normalized = customNormalize(dataPart, 1, CHART_HEIGHT - CHART_HEIGHT_GAP)
+    drawChartLine(lines, xCoordinates, normalized)
   }
 
   function buildXCoordinates() {
@@ -261,16 +325,16 @@ function createBarChart(chartRootElement, data) {
     return data.map(item => points * (item - min) / delta)
   }
 
-  function customNormalize(data, max, points, padding = 0) {
-    return data.map(item => !max ? padding : (points * item / max) + padding)
+  function customNormalize(data, max, points, padding = 0, min = 0) {
+    return data.map(item => !max ? padding : (points * (item - min) / (max - min)) + padding)
   }
 
-  function drawChartLine(color, x, y, width) {
-      drawBars(chart, x, y, color, width)
+  function drawChartLine(line, x, y) {
+    drawStackedArea(chart, x, y, line.color)
   }
 
   function drawPreviewLine(line, x, y) {
-    drawBars(preview, x, y, line.color, PREVIEW_WIDTH / x.length)
+    drawStackedArea(preview, x, y, line.color)
   }
 
   function calculateZoom(start, end) {
@@ -300,10 +364,6 @@ function createBarChart(chartRootElement, data) {
     columns.forEach(column => callback(column.data, column.name))
   }
 
-  function getMax(data) {
-    return Math.max(...data)
-  }
-
   function createYAxes() {
     let yAxesGroupShown = svgEl('g', {}, 'y-axes')
     let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'hidden');
@@ -319,11 +379,12 @@ function createBarChart(chartRootElement, data) {
   }
 
   function createYLines() {
-    let lineGroup = svgEl('g', {}, 'y-axes')
+    let lineGroup = svgEl('g')
 
-    let step = Math.ceil(CHART_HEIGHT / NUMBER_Y_AXES)
+    let step = Math.ceil((CHART_HEIGHT - CHART_HEIGHT_GAP) / (NUMBER_Y_AXES - 1))
     for (let i = 0; i < NUMBER_Y_AXES; i++) {
-      let line = createAxisLine(10, CHART_WIDTH - 10, CHART_HEIGHT - step * i, CHART_HEIGHT - step * i)
+      let y = CHART_HEIGHT - step * i
+      let line = createAxisLine(10, CHART_WIDTH - 10, y, y)
       add(lineGroup, line)
     }
 
