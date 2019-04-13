@@ -160,7 +160,7 @@ function createDoubleYLineChart(chartRootElement, data) {
       let rightElements = yAxesRightGroupHidden.childNodes
       normalizedAxes.forEach((y, i) => {
         let text = isRight ? rightElements[i] : leftElements[i]
-        text.textContent = axes[axes.length - i - 1]
+        text.textContent = formatAxisValue(axes[axes.length - i - 1])
         svgAttrs(text, {
           x: isRight ? CHART_WIDTH - ((text.textContent.length + 1) * 7) : 5,
           y: CHART_HEIGHT - y - 5 /** place text a bit above the line */
@@ -262,13 +262,13 @@ function createDoubleYLineChart(chartRootElement, data) {
       })
       animate.beginElement()
 
-      pointChartValues[lineName].value.innerText = data[selectedXIndex]
+      pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
     pointDate.innerText = new Date(xValue).toString().slice(0, 15)
       let fromRight = xCoordinate > CHART_WIDTH / 2
-      selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 180: xCoordinate) + 'px)'
+      selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 200 : xCoordinate + 20) + 'px)'
       selectedPointInfo.style.display = 'block'
       selectedLine.style.display = 'block'
   }

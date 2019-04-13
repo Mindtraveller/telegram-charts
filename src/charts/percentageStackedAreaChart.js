@@ -116,7 +116,7 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
     let elements = yAxesGroupHidden.childNodes
     normalizedAxes.forEach((y, i) => {
       let text = elements[i]
-      text.textContent = axes[axes.length - i - 1]
+      text.textContent = formatAxisValue(axes[axes.length - i - 1])
       svgAttrs(text, { x: 5, y: CHART_HEIGHT - y - 5 /** place text a bit above the line */ })
     })
 
@@ -192,13 +192,13 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
 
     eachColumn(chartData.columns, (data, lineName) => {
       pointChartValues[lineName].subValue.innerText = Math.round(data[selectedXIndex] / sum * 100) + '%'
-      pointChartValues[lineName].value.innerText = data[selectedXIndex]
+      pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
     pointDate.innerText = new Date(xValue).toString().slice(0, 15)
     let fromRight = xCoordinate > CHART_WIDTH / 2
-    selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 180 : xCoordinate) + 'px)'
+    selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 200 : xCoordinate + 20) + 'px)'
     selectedPointInfo.style.display = 'block'
     selectedLine.style.display = 'block'
   }

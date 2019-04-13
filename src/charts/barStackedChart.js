@@ -127,6 +127,7 @@ function createBarStackedChart(chartRootElement, data) {
       selectedXIndex = newIndex
 
       clearCanvas(chart)
+      localStacked = buildLocalStackedData(columnsToShow)
       displayData(localStacked)
       displaySelectedPoint()
     }
@@ -134,11 +135,15 @@ function createBarStackedChart(chartRootElement, data) {
 
   on(d, 'click', event => {
     if (!chartRootElement.contains(event.target)) {
-      selectedXIndex = -1
+      let newIndex = -1
 
-      clearCanvas(chart)
-      displayData(localStacked)
-      displaySelectedPoint()
+      if (newIndex !== selectedXIndex) {
+        selectedXIndex = newIndex
+        clearCanvas(chart)
+        localStacked = buildLocalStackedData(columnsToShow)
+        displayData(localStacked)
+        displaySelectedPoint()
+      }
     }
   })
 
@@ -154,7 +159,7 @@ function createBarStackedChart(chartRootElement, data) {
     let elements = yAxesGroupHidden.childNodes
     normalizedAxes.reverse().forEach((y, i) => {
       let text = elements[i]
-      text.textContent = axes[axes.length - i - 1]
+      text.textContent = formatAxisValue(axes[axes.length - i - 1])
       svgAttrs(text, { x: 5, y: CHART_HEIGHT - y - 5 /** place text a bit above the line */ })
     })
 
@@ -228,13 +233,13 @@ function createBarStackedChart(chartRootElement, data) {
     let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end] - x[start])
 
     eachColumn(chartData.columns, (data, lineName) => {
-      pointChartValues[lineName].value.innerText = data[selectedXIndex]
+      pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
     pointDate.innerText = new Date(xValue).toString().slice(0, 15)
     let fromRight = xCoordinate > CHART_WIDTH / 2
-    selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 180 : xCoordinate) + 'px)'
+    selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 200 : xCoordinate + 20) + 'px)'
     selectedPointInfo.style.display = 'block'
   }
 
@@ -296,8 +301,6 @@ function createBarStackedChart(chartRootElement, data) {
         let line = chartData.lines[name]
         let toBeAdded = !oldColumns.find(column => column.name === name)
         let toBeRemoved = !visibilityMap[name]
-        let prevColumn = columnsToUse[c + 1]
-        let nextColumn = columnsToUse[c - 1]
 
         let dataPart = []
 
@@ -311,14 +314,7 @@ function createBarStackedChart(chartRootElement, data) {
 
           for (let i = 0; i < dataPart.length - 1; i += 2) {
             dataPart[i] = dataPart[i] - dataPart[i] * progress
-
-            // if (nextColumn) {
-            //   let nextColumnData = newStackedData[nextColumn.name] || []
-            //   let nextColumnPrevData = oldStackedData[nextColumn.name]
-            // dataPart[i + 1] = nextColumnPrevData[i] + (nextColumnPrevData[i] - (nextColumnData[i] || 0)) * (1 - progress) - dataPart[i]
-            // } else {
             dataPart[i + 1] = dataPart[i + 1] * (1 - progress)
-            // }
           }
         } else {
           dataPart = newStackedData[name].slice(0)
@@ -330,8 +326,7 @@ function createBarStackedChart(chartRootElement, data) {
           }
         }
 
-        let chartNormalized = customNormalize(dataPart.slice(start * 2, end * 2 + 2), oldYMax + (newYMax - oldYMax) * progress, CHART_HEIGHT)
-        drawChartLine(line.color, localXCoordinates, chartNormalized, CHART_WIDTH / (chartNormalized.length / 2))
+        normalizeAndDisplay(line, dataPart.slice(start * 2, end * 2 + 2), oldYMax + (newYMax - oldYMax) * progress)
 
         let previewNormalized = customNormalize(dataPart, oldYMax + (newYMax - oldYMax) * progress, PREVIEW_HEIGHT)
         drawPreviewLine(line.color, xPreviewCoordinates, previewNormalized)
@@ -357,7 +352,7 @@ function createBarStackedChart(chartRootElement, data) {
 
   function displayData(percentage) {
     eachColumn(columnsToShow, (_, lineName) => {
-      normalizeAndDisplay(chartData.lines[lineName], percentage[lineName])
+      normalizeAndDisplay(chartData.lines[lineName], percentage[lineName], newYMax)
     })
   }
 
@@ -372,8 +367,8 @@ function createBarStackedChart(chartRootElement, data) {
     drawPreviewLine(getLineColor(line.color), xPreviewCoordinates, previewNormalized)
   }
 
-  function normalizeAndDisplay(lines, data) {
-    let normalized = customNormalize(data, newYMax, CHART_HEIGHT)
+  function normalizeAndDisplay(lines, data, max) {
+    let normalized = customNormalize(data, max, CHART_HEIGHT)
     width = CHART_WIDTH / (normalized.length / 2)
 
     if (selectedXIndex === -1) {
