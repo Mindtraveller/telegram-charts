@@ -14,10 +14,12 @@ function createChart(data, index) {
 
   if (data.y_scaled) {
     createDoubleYLineChart(chartRootElement, data)
-  } else if (data.types.y0 === 'bar') {
+  } else if (data.types.y0 === 'bar' && !data.stacked) {
     createBarChart(chartRootElement, data)
   } else if (data.types.y0 === 'area') {
     createPercentageStackedAreaChart(chartRootElement, data)
+  } else if (data.types.y0 === 'bar' && data.stacked) {
+    createBarStackedChart(chartRootElement, data)
   } else {
     createLineChart(chartRootElement, data)
   }
@@ -55,9 +57,8 @@ function createChart(data, index) {
     }
   })
 
-
-
   let dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+
   function formatDate(timestamp) {
     return dateFormat.format(new Date(timestamp))
   }

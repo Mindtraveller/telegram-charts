@@ -50,6 +50,18 @@ function drawStackedArea(canvas, x, y, color) {
   context.fill()
 }
 
+function drawStackedBars(canvas, x, y, color, width, alpha = 1) {
+  let context = canvas.getContext('2d')
+  context.beginPath()
+  width = Math.ceil(width)
+  context.fillStyle = color
+  context.globalAlpha = alpha
+  for (let i = 0; i < x.length; i++) {
+    context.rect(x[i], y[i * 2], width, y[i * 2 + 1]);
+  }
+  context.fill()
+}
+
 function createSelectedPointInfo(chartData) {
   let info = el('div', 'point-info')
   let chartInfoContainer = el('div', 'charts-info')

@@ -8,7 +8,8 @@ const BUTTON_COLORS = {
   "#9ED448": '#9ED448',
   "#5FB641": '#5FB641',
   "#F5BD25": '#F5BD25',
-  "#F79E39": '#F79E39'
+  "#F79E39": '#F79E39',
+  "#E65850": '#E65850'
 }
 
 const TOOLTIP_COLORS = {
@@ -22,5 +23,20 @@ const TOOLTIP_COLORS = {
   "#9ED448": '#89C32E',
   "#5FB641": '#4BAB29',
   "#F5BD25": '#EAAF10',
-  "#F79E39": '#F58608'
+  "#F79E39": '#F58608',
+  "#E65850": '#F34C44'
+}
+
+const LINE_COLORS = {
+  "#3497ED": '#3497ED',
+  "#2373DB": '#2373DB',
+  "#9ED448": '#9ED448',
+  "#5FB641": '#5FB641',
+  "#F5BD25": '#F5BD25',
+  "#F79E39": '#F79E39',
+  "#E65850": '#E65850'
+}
+
+function getLineColor(color) {
+  return LINE_COLORS[color]
 }
