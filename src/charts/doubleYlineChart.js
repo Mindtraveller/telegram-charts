@@ -353,7 +353,11 @@ function createDoubleYLineChart(chartRootElement, data) {
   }
 
   function customNormalize(data, max, points, padding = 0, min = 0) {
-    return data.map(item => !max ? padding : (points * (item - min) / (max - min)) + padding)
+    let result = data.slice(0)
+    for (let i = 0; i < data.length; i++) {
+      result[i] = !max ? padding : (points * (result[i] - min) / (max - min)) + padding
+    }
+    return result
   }
 
   function drawChartLine(line, x, y, alpha = 1) {

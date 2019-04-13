@@ -78,7 +78,7 @@ function createButtons(chartData, chartRootElement) {
 
     // do not allow to hide all charts
     if (!Object.values(newVisibilityMap).some(value => value)) {
-      applyAnimation(button, 'shake')
+      applyAnimation(button, 'shake', 800)
       return
     }
 

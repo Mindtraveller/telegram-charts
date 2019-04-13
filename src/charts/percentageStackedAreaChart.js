@@ -120,10 +120,8 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
       svgAttrs(text, { x: 5, y: CHART_HEIGHT - y - 5 /** place text a bit above the line */ })
     })
 
-    removeClass(yAxesGroupHidden, 'm-down', 'm-up')
-    removeClass(yAxesGroupShown, 'm-down', 'm-up')
-    addClass(yAxesGroupHidden, 'm-up', 'pending')
-    addClass(yAxesGroupShown, 'm-down', 'pending')
+    yAxesGroupHidden.style.transition = '0s'
+    addClass(yAxesGroupHidden, 'm-up')
 
     let _ = yAxesGroupHidden
     yAxesGroupHidden = yAxesGroupShown
@@ -131,9 +129,8 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
 
     // proper position will be set without animation and only then animation will start
     setTimeout(() => {
-      removeClass(yAxesGroupShown, 'hidden', 'pending')
-      removeClass(yAxesGroupHidden, 'pending')
-      addClass(yAxesGroupHidden, 'hidden')
+      yAxesGroupShown.style.transition = null
+      yAxesGroupShown.style.opacity = null
     }, 0)
   }
 
@@ -228,7 +225,15 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
   }
 
   function animateVisibilityChange(newColumnsToShow, oldColumns, newPercentage, oldPercentage) {
-    let columnsToUse = newColumnsToShow.length >= columnsToShow.length ? newColumnsToShow : oldColumns
+    let lines = {}
+    let columnsToUse = newColumnsToShow
+      .concat(oldColumns)
+      .filter(a => {
+        let result = lines[a.name]
+        lines[a.name] = true
+        return !result
+      })
+      .sort((a, b) => a.name > b.name ? 1 : a.name === b.name ? 0 : -1)
 
     scheduleAnimation(progress => {
       clearCanvas(chart)
@@ -254,10 +259,10 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
           for (let i = 0; i < dataPart.length - 1; i += 2) {
             dataPart[i] = prevColumnNextData ?
               prevColumnPrevData[i + 1] + (prevColumnNextData[i + 1] - prevColumnPrevData[i + 1]) * progress :
-              0
+              prevColumnPrevData ? prevColumnPrevData[i + 1] * (1 - progress) : 0
             dataPart[i + 1] = nextColumnNextData ?
               nextColumnPrevData[i] + (nextColumnNextData[i] - nextColumnPrevData[i]) * progress :
-              1
+              prevColumnPrevData && !prevColumnNextData ? 1 : !prevColumnNextData ? progress : 1
           }
         } else if (toBeRemoved) {
           let prevColumnNextData = prevColumn ? newPercentage[prevColumn.name] : null
@@ -269,11 +274,14 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
           for (let i = 0; i < dataPart.length - 1; i += 2) {
             dataPart[i] = prevColumnPrevData && prevColumnNextData ?
               prevColumnPrevData[i + 1] + (prevColumnNextData[i + 1] - prevColumnPrevData[i + 1]) * progress :
-              prevColumnPrevData ? prevColumnPrevData[i + 1] + (1 - prevColumnPrevData[i + 1]) * progress : 0
+              prevColumnNextData ?
+                prevColumnNextData[i + 1] * progress :
+                !nextColumnNextData ?
+                  dataPart[i] + (1 - dataPart[i]) * progress : dataPart[i] * (1 - progress)
 
             dataPart[i + 1] = nextColumnPrevData && nextColumnNextData ?
               nextColumnPrevData[i] + (nextColumnNextData[i] - (nextColumnPrevData[i] || 1)) * progress :
-              nextColumnPrevData ? nextColumnPrevData[i] - nextColumnPrevData[i] * progress : 1
+              nextColumnNextData ? 1 - progress : 1
           }
         } else {
           dataPart = newPercentage[name].slice(0)
@@ -326,7 +334,11 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
   }
 
   function customNormalize(data, max, points, padding = 0, min = 0) {
-    return data.map(item => !max ? padding : (points * (item - min) / (max - min)) + padding)
+    let result = data.slice(0)
+    for (let i = 0; i < data.length; i++) {
+      result[i] = !max ? padding : (points * (result[i] - min) / (max - min)) + padding
+    }
+    return result
   }
 
   function drawChartLine(line, x, y) {
@@ -365,17 +377,15 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
   }
 
   function createYAxes() {
-    let yAxesGroupShown = svgEl('g', {}, 'y-axes')
-    let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'hidden');
+    let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'm-up');
+    yAxesGroupHidden.style.opacity = '0'
 
-    [yAxesGroupShown, yAxesGroupHidden].forEach(group => {
-      for (let i = 0; i < NUMBER_Y_AXES; i++) {
-        let text = createSVGText('', 5, 0)
-        add(group, text)
-      }
-    })
+    for (let i = 0; i < NUMBER_Y_AXES; i++) {
+      let text = createSVGText('', 5, 0)
+      add(yAxesGroupHidden, text)
+    }
 
-    return { yAxesGroupShown, yAxesGroupHidden }
+    return { yAxesGroupHidden }
   }
 
   function createYLines() {

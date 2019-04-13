@@ -4,6 +4,8 @@
     border-radius: 5px;
     overflow: hidden;
     height: 50px;
+    will-change: auto;
+    transform: translateZ(0);
 }
 
 .slider-container {
@@ -19,6 +21,10 @@
     position: relative;
     background: #E2EEF9;
     opacity: 0.6;
+    width: 1px;
+    will-change: width;
+    transform: translateZ(0);
+    transform-origin: left center;
 }
 
 .shadow.left {
@@ -50,7 +56,7 @@
 
 .slider__bar:before {
     content: '|';
-    position:absolute;
+    position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%) translateY(-50%);

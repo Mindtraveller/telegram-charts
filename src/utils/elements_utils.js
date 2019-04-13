@@ -45,10 +45,11 @@ function emit(element, eventName, data) {
     element.dispatchEvent(new CustomEvent(eventName, { detail: data }));
 }
 
-function applyAnimation(element, animationName) {
-  element.style.animationName = null
-  void element.offsetWidth
+function applyAnimation(element, animationName, duration = 250) {
   element.style.animationName = animationName
+  setTimeout(() => {
+    element.style.animationName = null
+  }, duration)
 }
 
 function clearChildren(element) {

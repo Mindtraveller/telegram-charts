@@ -55,8 +55,10 @@ function createChart(data, index) {
     }
   })
 
+
+
+  let dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
   function formatDate(timestamp) {
-    let date = new Date(timestamp)
-    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    return dateFormat.format(new Date(timestamp))
   }
 }

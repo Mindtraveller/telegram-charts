@@ -17,6 +17,8 @@
 
 .selected-range > .range-from,
 .selected-range > .range-to {
+    will-change: contents;
+    transform: translateZ(0);
     display: inline-block;
     animation-duration: .25s;
     transition: transform .25s;
