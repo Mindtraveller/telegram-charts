@@ -48,6 +48,8 @@ function createBarStackedChart(chartRootElement, data) {
   let localXCoordinates = buildXCoordinates()
   let xPreviewCoordinates = normalizeX(x, CHART_WIDTH)
 
+  let cachedSums = {}
+
   let newYMax = calculateYMax(columnsToShow)
   let newPreviewYMax = calculatePreviewYMax(columnsToShow)
 
@@ -74,11 +76,11 @@ function createBarStackedChart(chartRootElement, data) {
 
     let newStackedData = getStackedData(newColumnsToShow)
 
-    newYMax = calculateYMax(newColumnsToShow)
-    displayYAxes(yMax, newYMax)
-
     newPreviewYMax = calculatePreviewYMax(newColumnsToShow)
-    animatePreviewVisibilityChange(newColumnsToShow, columnsToShow, newStackedData, stacked, newPreviewYMax, previewYMax)
+    newYMax = calculateYMax(newColumnsToShow)
+
+    displayYAxes(yMax, newYMax)
+    animateVisibilityChange(newColumnsToShow, columnsToShow, newStackedData, stacked, newPreviewYMax, previewYMax, newYMax, yMax)
 
     yMax = newYMax
     previewYMax = newPreviewYMax
@@ -244,7 +246,7 @@ function createBarStackedChart(chartRootElement, data) {
     let total = 0
 
     eachColumn(chartData.columns, (data, lineName) => {
-      total += data[selectedXIndex]
+      total += visibilityMap[lineName] ? data[selectedXIndex] : 0
       pointChartValues[lineName].value.style.color = getTooltipColor(chartData.colors[lineName])
       pointChartValues[lineName].value.textContent = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
@@ -267,7 +269,7 @@ function createBarStackedChart(chartRootElement, data) {
   }
 
   function getStackedData(columns) {
-    let key = columns.reduce((acc, column) => acc + column.name, '')
+    let key = buildKey(columns)
     if (cachedStackedData[key]) {
       return cachedStackedData[key]
     }
@@ -275,6 +277,10 @@ function createBarStackedChart(chartRootElement, data) {
     let stackedData = buildStackedData(columns)
     cachedStackedData[key] = stackedData
     return stackedData
+  }
+
+  function buildKey(columns) {
+    return columns.reduce((acc, column) => acc + column.name, '')
   }
 
   function buildStackedData(columns) {
@@ -296,7 +302,7 @@ function createBarStackedChart(chartRootElement, data) {
     return result
   }
 
-  function animatePreviewVisibilityChange(newColumnsToShow, oldColumns, newStackedData, oldStackedData, newYMax, oldYMax) {
+  function animateVisibilityChange(newColumnsToShow, oldColumns, newStackedData, oldStackedData, newPreviewYMax, oldPreviewYMax, newYMax, oldYMax) {
     let lines = {}
     let columnsToUse = newColumnsToShow
       .concat(oldColumns)
@@ -316,6 +322,7 @@ function createBarStackedChart(chartRootElement, data) {
         let line = chartData.lines[name]
         let toBeAdded = !oldColumns.find(column => column.name === name)
         let toBeRemoved = !visibilityMap[name]
+        let prevColumn = columnsToUse[c + 1]
 
         let dataPart = []
 
@@ -328,10 +335,16 @@ function createBarStackedChart(chartRootElement, data) {
           if (progress === 1) {
             continue
           }
+
+          let prevColumnPrevData = prevColumn ? oldStackedData[prevColumn.name] : null
+          let prevColumnNextData = prevColumn ? newStackedData[prevColumn.name] : null
           dataPart = oldStackedData[name].slice(0)
 
           for (let i = 0; i < dataPart.length - 1; i += 2) {
-            dataPart[i] = dataPart[i] - dataPart[i] * progress
+            dataPart[i] = prevColumnPrevData && prevColumnNextData ?
+              prevColumnPrevData[i] + (prevColumnNextData[i] - prevColumnPrevData[i]) +
+              prevColumnPrevData[i + 1] + (prevColumnNextData[i + 1] - prevColumnPrevData[i + 1]) * progress
+              : dataPart[i] - dataPart[i] * progress
             dataPart[i + 1] = dataPart[i + 1] * (1 - progress)
           }
         } else {
@@ -346,26 +359,39 @@ function createBarStackedChart(chartRootElement, data) {
 
         normalizeAndDisplay(line, dataPart.slice(start * 2, end * 2 + 2), oldYMax + (newYMax - oldYMax) * progress)
 
-        let previewNormalized = customNormalize(dataPart, oldYMax + (newYMax - oldYMax) * progress, PREVIEW_HEIGHT)
+        let previewNormalized = customNormalize(dataPart, oldPreviewYMax + (newPreviewYMax - oldPreviewYMax) * progress, PREVIEW_HEIGHT)
         drawPreviewLine(line.color, xPreviewCoordinates, previewNormalized)
       }
     }, ANIMATION_TIME)
   }
 
   function calculatePreviewYMax(columns) {
+    return getMax(getSum(columns))
+  }
+
+  function calculateYMax(columns) {
+    let sums = getSum(columns)
+    return getMax(sums.slice(start, end + 1))
+  }
+
+  function getSum(columns) {
+    let key = buildKey(columns)
+
+    if (cachedSums[key]) {
+      return cachedSums[key]
+    }
+
+    let sums = calculateSum(columns)
+    cachedSums[key] = sums
+    return sums
+  }
+
+  function calculateSum(columns) {
     let sums = []
     for (let i = 0; i < x.length; i++) {
       sums.push(columns.reduce((acc, column) => acc + column.data[i], 0))
     }
-    return getMax(sums)
-  }
-
-  function calculateYMax(columns) {
-    let sums = []
-    for (let i = start; i < end + 1; i++) {
-      sums.push(columns.reduce((acc, column) => acc + column.data[i], 0))
-    }
-    return getMax(sums)
+    return sums
   }
 
   function displayData(percentage) {
