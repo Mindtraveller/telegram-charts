@@ -34,6 +34,7 @@ function createDoubleYLineChart(chartRootElement, data) {
   let yAxesLines = createYLines()
 
   let selectedLine = createAxisLine(0, 0, 0, CHART_HEIGHT)
+  addClass(selectedLine, 'y-axes', 'lines')
   let chartContainer = el('div', 'charts')
 
   add(chartContainer, chart, chartSVG, previewContainer, selectedPointInfo)
@@ -128,6 +129,13 @@ function createDoubleYLineChart(chartRootElement, data) {
       selectedXIndex = -1
       displaySelectedPoint()
     }
+  })
+
+  on(d, 'mode-change', () => {
+    clearCanvas(chart)
+    clearCanvas(preview)
+    displayData()
+    displayPreviewData()
   })
 
   function displayDoubleYAxes(yMax, newYMax, oldVisibilityMap) {
@@ -262,6 +270,7 @@ function createDoubleYLineChart(chartRootElement, data) {
       })
       animate.beginElement()
 
+      pointChartValues[lineName].value.style.color = getTooltipColor(chartData.colors[lineName])
       pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
@@ -352,20 +361,12 @@ function createDoubleYLineChart(chartRootElement, data) {
     return data.map(item => points * (item - min) / delta)
   }
 
-  function customNormalize(data, max, points, padding = 0, min = 0) {
-    let result = data.slice(0)
-    for (let i = 0; i < data.length; i++) {
-      result[i] = !max ? padding : (points * (result[i] - min) / (max - min)) + padding
-    }
-    return result
-  }
-
   function drawChartLine(line, x, y, alpha = 1) {
-    drawLine(chart, x, y, line.color, alpha, CHART_LINE_WEIGHT)
+    drawLine(chart, x, y, getLineColor(line.color), alpha, CHART_LINE_WEIGHT)
   }
 
   function drawPreviewLine(line, x, y, alpha = 1) {
-    drawLine(preview, x, y, line.color, alpha, PREVIEW_LINE_WEIGHT)
+    drawLine(preview, x, y, getLineColor(line.color), alpha, PREVIEW_LINE_WEIGHT)
   }
 
   function clearCharts() {
@@ -435,7 +436,7 @@ function createDoubleYLineChart(chartRootElement, data) {
   }
 
   function createYLines() {
-    let lineGroup = svgEl('g', {}, 'y-axes')
+    let lineGroup = svgEl('g', {}, 'y-axes', 'lines')
 
     let step = Math.ceil(CHART_HEIGHT / NUMBER_Y_AXES)
     for (let i = 0; i < NUMBER_Y_AXES; i++) {
@@ -470,10 +471,6 @@ function createDoubleYLineChart(chartRootElement, data) {
 
   function createChartPoint(color) {
     return svgEl('circle', { r: 6, fill: 'white', 'stroke': color, 'stroke-width': CHART_LINE_WEIGHT })
-  }
-
-  function createAxisLine(x1, x2, y1, y2) {
-    return svgEl('line', { x1, y1, x2, y2, fill: 'gray', stroke: 'gray', 'stroke-width': .3 })
   }
 
   function createSVGText(text, x, y) {

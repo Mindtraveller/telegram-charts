@@ -147,6 +147,13 @@ function createBarStackedChart(chartRootElement, data) {
     }
   })
 
+  on(d, 'mode-change', () => {
+    clearCanvas(chart)
+    clearCanvas(preview)
+    displayData(localStacked)
+    displayPreviewData(stacked)
+  })
+
   function displayYAxes(yMax, newYMax) {
     if (newYMax === yMax) {
       return
@@ -233,6 +240,7 @@ function createBarStackedChart(chartRootElement, data) {
     let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end] - x[start])
 
     eachColumn(chartData.columns, (data, lineName) => {
+      pointChartValues[lineName].value.style.color = getTooltipColor(chartData.colors[lineName])
       pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
@@ -402,14 +410,6 @@ function createBarStackedChart(chartRootElement, data) {
     return data.map(item => points * (item - min) / delta)
   }
 
-  function customNormalize(data, max, points, padding = 0, min = 0) {
-    let result = data.slice(0)
-    for (let i = 0; i < data.length; i++) {
-      result[i] = !max ? padding : (points * (result[i] - min) / (max - min)) + padding
-    }
-    return result
-  }
-
   function drawChartLine(color, x, y, width, alpha) {
     drawStackedBars(chart, x, y, color, width, alpha)
   }
@@ -450,8 +450,8 @@ function createBarStackedChart(chartRootElement, data) {
   }
 
   function createYAxes() {
-    let yAxesGroupShown = svgEl('g', {}, 'y-axes')
-    let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'hidden');
+    let yAxesGroupShown = svgEl('g', {}, 'y-axes', 'text')
+    let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'text', 'hidden');
 
     [yAxesGroupShown, yAxesGroupHidden].forEach(group => {
       for (let i = 0; i < NUMBER_Y_AXES; i++) {
@@ -464,7 +464,7 @@ function createBarStackedChart(chartRootElement, data) {
   }
 
   function createYLines() {
-    let lineGroup = svgEl('g')
+    let lineGroup = svgEl('g', {}, 'y-axes', 'lines')
 
     let step = Math.ceil(CHART_HEIGHT / NUMBER_Y_AXES)
     for (let i = 0; i < NUMBER_Y_AXES; i++) {
@@ -487,10 +487,6 @@ function createBarStackedChart(chartRootElement, data) {
         color,
       }
     })
-  }
-
-  function createAxisLine(x1, x2, y1, y2) {
-    return svgEl('line', { x1, y1, x2, y2, fill: 'gray', stroke: 'gray', 'stroke-width': .3 })
   }
 
   function createSVGText(text, x, y) {

@@ -32,6 +32,7 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
   let { yAxesGroupShown, yAxesGroupHidden } = createYAxes()
 
   let selectedLine = createAxisLine(0, 0, 0, CHART_HEIGHT)
+  addClass(selectedLine, 'y-axes', 'lines')
   let chartContainer = el('div', 'charts')
 
   add(chartContainer, chart, chartSVG, previewContainer, selectedPointInfo)
@@ -106,6 +107,13 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
       selectedXIndex = -1
       displaySelectedPoint()
     }
+  })
+
+  on(d, 'mode-change', () => {
+    clearCanvas(chart)
+    clearCanvas(preview)
+    displayData(percentage)
+    displayPreviewData(percentage)
   })
 
   function displayYAxes() {
@@ -192,6 +200,7 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
 
     eachColumn(chartData.columns, (data, lineName) => {
       pointChartValues[lineName].subValue.innerText = Math.round(data[selectedXIndex] / sum * 100) + '%'
+      pointChartValues[lineName].value.style.color = getTooltipColor(chartData.colors[lineName])
       pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
@@ -333,20 +342,12 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
     return data.map(item => points * (item - min) / delta)
   }
 
-  function customNormalize(data, max, points, padding = 0, min = 0) {
-    let result = data.slice(0)
-    for (let i = 0; i < data.length; i++) {
-      result[i] = !max ? padding : (points * (result[i] - min) / (max - min)) + padding
-    }
-    return result
-  }
-
   function drawChartLine(line, x, y) {
-    drawStackedArea(chart, x, y, line.color)
+    drawStackedArea(chart, x, y, getLineColor(line.color))
   }
 
   function drawPreviewLine(line, x, y) {
-    drawStackedArea(preview, x, y, line.color)
+    drawStackedArea(preview, x, y, getLineColor(line.color))
   }
 
   function calculateZoom(start, end) {
@@ -377,7 +378,7 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
   }
 
   function createYAxes() {
-    let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'm-up');
+    let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'text', 'm-up');
     yAxesGroupHidden.style.opacity = '0'
 
     for (let i = 0; i < NUMBER_Y_AXES; i++) {
@@ -389,7 +390,7 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
   }
 
   function createYLines() {
-    let lineGroup = svgEl('g')
+    let lineGroup = svgEl('g', {}, 'y-axes', 'lines')
 
     let step = Math.ceil((CHART_HEIGHT - CHART_HEIGHT_GAP) / (NUMBER_Y_AXES - 1))
     for (let i = 0; i < NUMBER_Y_AXES; i++) {
@@ -412,10 +413,6 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
         color,
       }
     })
-  }
-
-  function createAxisLine(x1, x2, y1, y2) {
-    return svgEl('line', { x1, y1, x2, y2, fill: 'gray', stroke: 'gray', 'stroke-width': .3 })
   }
 
   function createSVGText(text, x, y) {

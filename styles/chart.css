@@ -20,17 +20,22 @@ circle {
     animation-fill-mode: forwards;
 }
 
-line {
-    fill: #182D3B;
-    stroke-opacity: .2;
-}
-
-.x-axes,
-.y-axes {
+.x-axes {
     fill: #8E8E93;
 }
 
+.bar-chart .x-axes {
+    fill: #252529;
+    opacity: .5;
+}
+
+.dark .x-axes {
+    fill: #A3B1C2;
+    opacity: .6;
+}
+
 .x-axes > text {
+    font-size: 12px;
     transition: transform 125ms, opacity 125ms;
     text-anchor: middle;
 }
@@ -61,7 +66,43 @@ line {
 }
 
 .y-axes {
+    font-size: 12px;
     transition: transform .25s, opacity .25s;
+}
+
+.y-axes.lines {
+    fill: #182D3B;
+    stroke: #182D3B;
+    opacity: .1;
+}
+
+.dark .y-axes.lines {
+    fill: #FFFFFF;
+    stroke: #FFFFFF;
+    opacity: .1;
+}
+
+.y-axes.text {
+    fill: #8E8E93;
+}
+
+.bar-chart .y-axes.text {
+    fill: #252529;
+    opacity: .5;
+}
+
+.y-axes text {
+    font-size: 12px;
+}
+
+.dark .y-axes.text {
+    fill: #A3B1C2;
+    opacity: .6;
+}
+
+.dark .bar-chart .y-axes.text {
+    fill: #ECF2F8;
+    opacity: .5;
 }
 
 .y-axes.hidden {

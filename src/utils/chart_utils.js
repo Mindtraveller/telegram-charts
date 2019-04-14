@@ -35,7 +35,7 @@ function drawBars(canvas, x, y, color, width) {
 }
 
 function drawStackedArea(canvas, x, y, color) {
-  let context = canvas.getContext('2d')
+  let context = canvas.getContext('2d') // TODO: pass context as param
   context.beginPath()
   context.fillStyle = color
   context.strokeStyle = color
@@ -71,7 +71,6 @@ function createSelectedPointInfo(chartData) {
     let div = el('div', 'info')
     let value = el('span')
     let subValue = el('span')
-    value.style.color = TOOLTIP_COLORS[chartData.colors[chart]]
     acc[chart] = { value, subValue }
     let name = el('span', 'name')
     add(name, t(chartName))
@@ -81,4 +80,8 @@ function createSelectedPointInfo(chartData) {
   }, {})
 
   return { selectedPointInfo: info, pointChartValues: chartValues, pointDate: date }
+}
+
+function createAxisLine(x1, x2, y1, y2) {
+  return svgEl('line', { x1, y1, x2, y2, 'stroke-width': 1 })
 }

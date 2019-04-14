@@ -1,9 +1,14 @@
 function createButtons(chartData, chartRootElement) {
   let LONG_TOUCH_DURATION = 300
   let longTouchTimeout = null
+  let CHART_BUTTONS = []
 
   let buttons = el('div', 'buttons');
   on(buttons, isTouchDevice() ? 'touchstart' : 'mousedown', handleTouchStart)
+
+  on(d, 'mode-change', () => {
+    CHART_BUTTONS.forEach(setColor)
+  })
 
   let visibilityMap = Object.keys(chartData.names).reduce((acc, chartName) => ({
     ...acc,
@@ -13,19 +18,24 @@ function createButtons(chartData, chartRootElement) {
   Object.keys(chartData.names).forEach(chart => {
     let button = el('button');
     let div = el('div');
+    let span = el('span');
+    CHART_BUTTONS.push({ button, div, span, color: chartData.colors[chart] })
+    setColor({ button, div, span, color: chartData.colors[chart] })
     add(button, div);
-    const buttonColor = BUTTON_COLORS[chartData.colors[chart]];
-    button.style.borderColor = buttonColor
-    div.style.background = buttonColor
     let icon = svgEl('svg', { width: '18', height: '18', viewBox: '0 0 24 24' });
     add(icon, svgEl('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' }));
-    let span = el('span');
-    span.style.color = buttonColor
     add(span, t(chartData.names[chart]));
     add(button, icon, span);
     button.dataset.chart = chart;
     add(buttons, button);
   });
+
+  function setColor(chartButton) {
+    const buttonColor = getButtonColor([chartButton.color]);
+    chartButton.button.style.borderColor = buttonColor
+    chartButton.div.style.background = buttonColor
+    chartButton.span.style.color = buttonColor
+  }
 
   function handleTouchStart(event) {
     let chartToggled = event.target.dataset.chart

@@ -12,5 +12,7 @@ let isDark = false;
     d.body.classList.toggle('dark');
     isDark = !isDark;
     button.innerText = isDark ? DARK_LABEL : LIGHT_LABEL;
+
+    emit(d, 'mode-change', { isDark });
   }
 })();

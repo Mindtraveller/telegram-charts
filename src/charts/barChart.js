@@ -113,6 +113,12 @@ function createBarChart(chartRootElement, data) {
     }
   })
 
+  on(d, 'mode-change', () => {
+    clearCanvas(chart)
+    clearCanvas(preview)
+    displayData(true)
+  })
+
   function displayYAxes(yMax, newYMax) {
     if (newYMax === yMax) {
       return
@@ -199,6 +205,7 @@ function createBarChart(chartRootElement, data) {
     let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end] - x[start])
 
     eachColumn(chartData.columns, (data, lineName) => {
+      pointChartValues[lineName].value.style.color = getTooltipColor(chartData.colors[lineName])
       pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = 'flex'
     })
@@ -236,7 +243,7 @@ function createBarChart(chartRootElement, data) {
 
 
     if (selectedXIndex === -1) {
-      drawChartLine(lines.color, xCoordinates, normalized, width)
+      drawChartLine(getLineColor(lines.color), xCoordinates, normalized, width)
       return
     }
 
@@ -261,20 +268,12 @@ function createBarChart(chartRootElement, data) {
     return data.map(item => points * (item - min) / delta)
   }
 
-  function customNormalize(data, max, points, padding = 0, min = 0) {
-    let result = data.slice(0)
-    for (let i = 0; i < data.length; i++) {
-      result[i] = !max ? padding : (points * (result[i] - min) / (max - min)) + padding
-    }
-    return result
-  }
-
   function drawChartLine(color, x, y, width) {
       drawBars(chart, x, y, color, width)
   }
 
   function drawPreviewLine(line, x, y) {
-    drawBars(preview, x, y, line.color, PREVIEW_WIDTH / x.length)
+    drawBars(preview, x, y, getLineColor(line.color), PREVIEW_WIDTH / x.length)
   }
 
   function calculateZoom(start, end) {
@@ -309,8 +308,8 @@ function createBarChart(chartRootElement, data) {
   }
 
   function createYAxes() {
-    let yAxesGroupShown = svgEl('g', {}, 'y-axes')
-    let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'hidden');
+    let yAxesGroupShown = svgEl('g', {}, 'y-axes', 'text')
+    let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'text', 'hidden');
 
     [yAxesGroupShown, yAxesGroupHidden].forEach(group => {
       for (let i = 0; i < NUMBER_Y_AXES; i++) {
@@ -323,7 +322,7 @@ function createBarChart(chartRootElement, data) {
   }
 
   function createYLines() {
-    let lineGroup = svgEl('g', {}, 'y-axes')
+    let lineGroup = svgEl('g', {}, 'y-axes', 'lines')
 
     let step = Math.ceil(CHART_HEIGHT / NUMBER_Y_AXES)
     for (let i = 0; i < NUMBER_Y_AXES; i++) {
@@ -345,10 +344,6 @@ function createBarChart(chartRootElement, data) {
         color,
       }
     })
-  }
-
-  function createAxisLine(x1, x2, y1, y2) {
-    return svgEl('line', { x1, y1, x2, y2, fill: 'gray', stroke: 'gray', 'stroke-width': .3 })
   }
 
   function createSVGText(text, x, y) {

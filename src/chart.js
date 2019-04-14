@@ -15,10 +15,13 @@ function createChart(data, index) {
   if (data.y_scaled) {
     createDoubleYLineChart(chartRootElement, data)
   } else if (data.types.y0 === 'bar' && !data.stacked) {
+    addClass(chartRootElement, 'bar-chart')
     createBarChart(chartRootElement, data)
   } else if (data.types.y0 === 'area') {
+    addClass(chartRootElement, 'bar-chart')
     createPercentageStackedAreaChart(chartRootElement, data)
   } else if (data.types.y0 === 'bar' && data.stacked) {
+    addClass(chartRootElement, 'bar-chart')
     createBarStackedChart(chartRootElement, data)
   } else {
     createLineChart(chartRootElement, data)
