@@ -57,9 +57,11 @@ function createBarStackedChart(chartRootElement, data) {
 
   let yAxesUpdateTimeout = null
 
+  let cachedStackedData = {}
+
   createChartLines()
 
-  let stacked = buildStackedData(columnsToShow, newYMax)
+  let stacked = getStackedData(columnsToShow)
   displayPreviewData(stacked)
 
   let localStacked
@@ -70,7 +72,7 @@ function createBarStackedChart(chartRootElement, data) {
     visibilityMap = newMap
     let newColumnsToShow = chartData.columns.filter(column => visibilityMap[column.name])
 
-    let newStackedData = buildStackedData(newColumnsToShow)
+    let newStackedData = getStackedData(newColumnsToShow)
 
     newYMax = calculateYMax(newColumnsToShow)
     displayYAxes(yMax, newYMax)
@@ -103,7 +105,7 @@ function createBarStackedChart(chartRootElement, data) {
 
     newYMax = calculateYMax(columnsToShow)
 
-    localStacked = buildLocalStackedData(columnsToShow)
+    localStacked = getLocalStackedData(columnsToShow)
 
     displayData(localStacked)
 
@@ -128,7 +130,7 @@ function createBarStackedChart(chartRootElement, data) {
       selectedXIndex = newIndex
 
       clearCanvas(chart)
-      localStacked = buildLocalStackedData(columnsToShow)
+      localStacked = getLocalStackedData(columnsToShow)
       displayData(localStacked)
       displaySelectedPoint()
     }
@@ -141,7 +143,7 @@ function createBarStackedChart(chartRootElement, data) {
       if (newIndex !== selectedXIndex) {
         selectedXIndex = newIndex
         clearCanvas(chart)
-        localStacked = buildLocalStackedData(columnsToShow)
+        localStacked = getLocalStackedData(columnsToShow)
         displayData(localStacked)
         displaySelectedPoint()
       }
@@ -255,23 +257,24 @@ function createBarStackedChart(chartRootElement, data) {
     selectedPointInfo.style.display = 'block'
   }
 
-  function buildLocalStackedData(columns) {
-    let result = columns.reduce((acc, column) => {
-      acc[column.name] = []
-      return acc
-    }, {})
-    for (let i = start; i < end + 1; i++) {
-      for (let c = 0; c < columns.length; c++) {
-        let column = columns[c]
-        let prevColumn = columns[c - 1]
-        let bottomValue = prevColumn ? result[prevColumn.name][(i - start) * 2] + result[prevColumn.name][(i - start) * 2 + 1] : 0
-        let topValue = column.data[i]
-        result[column.name].push(bottomValue);
-        result[column.name].push(topValue);
-      }
+  function getLocalStackedData(columns) {
+    let stackedData = getStackedData(columns)
+    let localStackedData = {}
+    Object.keys(stackedData).forEach(line => {
+      localStackedData[line] = stackedData[line].slice(start * 2, end * 2 + 2)
+    })
+    return localStackedData
+  }
+
+  function getStackedData(columns) {
+    let key = columns.reduce((acc, column) => acc + column.name, '')
+    if (cachedStackedData[key]) {
+      return cachedStackedData[key]
     }
 
-    return result
+    let stackedData = buildStackedData(columns)
+    cachedStackedData[key] = stackedData
+    return stackedData
   }
 
   function buildStackedData(columns) {
@@ -443,7 +446,7 @@ function createBarStackedChart(chartRootElement, data) {
         zoomLabels.push(toXLabel(x[i]))
       }
       labels[zoom] = zoomLabels
-      zoom --
+      zoom--
     }
     return labels
   }
