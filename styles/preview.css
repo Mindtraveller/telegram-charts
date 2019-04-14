@@ -22,8 +22,6 @@
     background: #E2EEF9;
     opacity: 0.6;
     width: 1px;
-    will-change: width;
-    transform: translateZ(0);
     transform-origin: left center;
 }
 

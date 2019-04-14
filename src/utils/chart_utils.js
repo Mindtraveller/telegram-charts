@@ -62,24 +62,36 @@ function drawStackedBars(canvas, x, y, color, width, alpha = 1) {
   context.fill()
 }
 
-function createSelectedPointInfo(chartData) {
+function createSelectedPointInfo(chartData, hasTotal) {
   let info = el('div', 'point-info')
   let chartInfoContainer = el('div', 'charts-info')
   let date = el('div')
   add(info, date, chartInfoContainer)
+
   let chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
     let div = el('div', 'info')
     let value = el('span')
     let subValue = el('span')
-    acc[chart] = { value, subValue }
     let name = el('span', 'name')
     add(name, t(chartName))
     add(div, subValue, name, value)
     add(chartInfoContainer, div)
+    acc[chart] = { value, subValue }
     return acc
   }, {})
 
-  return { selectedPointInfo: info, pointChartValues: chartValues, pointDate: date }
+  let value;
+  if (hasTotal) {
+    let div = el('div', 'info')
+    let subValue = el('span')
+    value = el('span')
+    let name = el('span', 'name')
+    add(name, t('All'))
+    add(div, subValue, name, value)
+    add(chartInfoContainer, div)
+  }
+
+  return { selectedPointInfo: info, pointChartValues: chartValues, pointDate: date, total: { value } }
 }
 
 function createAxisLine(x1, x2, y1, y2) {

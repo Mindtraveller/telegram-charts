@@ -27,7 +27,7 @@ function createBarStackedChart(chartRootElement, data) {
   let chart = createCanvas(CHART_WIDTH, CHART_HEIGHT)
   let { preview, previewContainer } = createPreview()
   let { buttons, visibilityMap } = createButtons(chartData, chartRootElement)
-  let { selectedPointInfo, pointChartValues, pointDate } = createSelectedPointInfo(chartData)
+  let { selectedPointInfo, pointChartValues, pointDate, total: pointTotal } = createSelectedPointInfo(chartData, true)
   let { xAxes, xAxesHidden } = createXAxes()
   let { yAxesGroupShown, yAxesGroupHidden } = createYAxes()
 
@@ -238,14 +238,17 @@ function createBarStackedChart(chartRootElement, data) {
 
     let xValue = x[selectedXIndex]
     let xCoordinate = CHART_WIDTH * (xValue - x[start]) / (x[end] - x[start])
+    let total = 0
 
     eachColumn(chartData.columns, (data, lineName) => {
+      total += data[selectedXIndex]
       pointChartValues[lineName].value.style.color = getTooltipColor(chartData.colors[lineName])
-      pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
+      pointChartValues[lineName].value.textContent = formatPointValue(data[selectedXIndex])
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
-    pointDate.innerText = new Date(xValue).toString().slice(0, 15)
+    pointTotal.value.textContent = formatPointValue(total)
+    pointDate.textContent = new Date(xValue).toString().slice(0, 15)
     let fromRight = xCoordinate > CHART_WIDTH / 2
     selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 200 : xCoordinate + 20) + 'px)'
     selectedPointInfo.style.display = 'block'
