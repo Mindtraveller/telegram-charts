@@ -295,6 +295,9 @@ function createLineChart(chartRootElement, data) {
         if (!oldColumns.find(column => column.name === columnName)) {
           alpha = Math.min(1, progress * 2)
         } else if (!visibilityMap[columnName]) {
+          if (progress === 1) {
+            return
+          }
           alpha = Math.max(0, 1 - (progress * 2))
         }
 
@@ -320,6 +323,9 @@ function createLineChart(chartRootElement, data) {
         if (!oldColumns.find(column => column.name === columnName)) {
           alpha = Math.min(1, progress * 2)
         } else if (!visibilityMap[columnName]) {
+          if (progress === 1) {
+            return
+          }
           alpha = Math.max(0, 1 - (progress * 2))
         }
 

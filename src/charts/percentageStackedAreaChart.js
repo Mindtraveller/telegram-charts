@@ -280,6 +280,10 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
               prevColumnPrevData && !prevColumnNextData ? 1 : !prevColumnNextData ? progress : 1
           }
         } else if (toBeRemoved) {
+          if (progress === 1) {
+            continue
+          }
+
           let prevColumnNextData = prevColumn ? newPercentage[prevColumn.name] : null
           let prevColumnPrevData = prevColumn ? oldPercentage[prevColumn.name] : null
           let nextColumnNextData = nextColumn ? newPercentage[nextColumn.name] : null

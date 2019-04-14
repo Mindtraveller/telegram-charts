@@ -318,6 +318,9 @@ function createDoubleYLineChart(chartRootElement, data) {
           previewHeight = previewHeight * (1 + (1 - progress))
           chartHeight = chartHeight * (1 + (1 - progress))
         } else if (toBeRemoved) {
+          if (progress === 1) {
+            return
+          }
           alpha = Math.max(0, 1 - (progress * 2))
           chartHeight = chartHeight + (chartHeight * progress)
           previewHeight = previewHeight + (previewHeight * progress)

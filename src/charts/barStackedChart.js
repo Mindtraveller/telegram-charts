@@ -322,6 +322,9 @@ function createBarStackedChart(chartRootElement, data) {
             dataPart[i + 1] = dataPart[i + 1] * progress
           }
         } else if (toBeRemoved) {
+          if (progress === 1) {
+            continue
+          }
           dataPart = oldStackedData[name].slice(0)
 
           for (let i = 0; i < dataPart.length - 1; i += 2) {
