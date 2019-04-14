@@ -97,3 +97,8 @@ function createSelectedPointInfo(chartData, hasTotal) {
 function createAxisLine(x1, x2, y1, y2) {
   return svgEl('line', { x1, y1, x2, y2, 'stroke-width': 1 })
 }
+
+let xLabelDateFormat = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' })
+function toXLabel(timestamp) {
+  return xLabelDateFormat.format(new Date(timestamp))
+}

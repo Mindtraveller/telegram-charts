@@ -439,11 +439,6 @@ function createBarStackedChart(chartRootElement, data) {
     return labels
   }
 
-  function toXLabel(timestamp) {
-    let label = (new Date(timestamp)).toString().slice(4, 10)
-    return label[4] === '0' ? `${label.slice(0, 4)}${label[5]}` : label // remove leading zeros
-  }
-
   function eachColumn(columns, callback) {
     columns.forEach(column => callback(column.data, column.name))
   }
