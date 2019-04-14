@@ -13,7 +13,6 @@
     border-radius: 25px;
     position: relative;
     animation-duration: .8s;
-    transform: translateZ(0);
 }
 
 .buttons > button > div {
@@ -23,7 +22,7 @@
     height: 100%;
     width: 100%;
     border-radius: 25px;
-    will-change: opacity;
+    transform: translateZ(0);
     transition: opacity 250ms;
     pointer-events: none;
     z-index: 1;

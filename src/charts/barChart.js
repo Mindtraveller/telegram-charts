@@ -105,11 +105,15 @@ function createBarChart(chartRootElement, data) {
 
   on(d, 'click', event => {
     if (!chartRootElement.contains(event.target)) {
-      selectedXIndex = -1
+      let newIndex = -1
 
-      clearCanvas(chart)
-      displayData()
-      displaySelectedPoint()
+      if (newIndex !== selectedXIndex) {
+        selectedXIndex = newIndex
+
+        clearCanvas(chart)
+        displayData()
+        displaySelectedPoint()
+      }
     }
   })
 
@@ -241,7 +245,6 @@ function createBarChart(chartRootElement, data) {
     let normalized = customNormalize(dataPart, newYMax, CHART_HEIGHT)
     let width = CHART_WIDTH / xCoordinates.length
 
-
     if (selectedXIndex === -1) {
       drawChartLine(getLineColor(lines.color), xCoordinates, normalized, width)
       return
@@ -269,7 +272,7 @@ function createBarChart(chartRootElement, data) {
   }
 
   function drawChartLine(color, x, y, width) {
-      drawBars(chart, x, y, color, width)
+    drawBars(chart, x, y, color, width)
   }
 
   function drawPreviewLine(line, x, y) {
@@ -301,10 +304,6 @@ function createBarChart(chartRootElement, data) {
 
   function eachColumn(columns, callback) {
     columns.forEach(column => callback(column.data, column.name))
-  }
-
-  function getMax(data) {
-    return Math.max(...data)
   }
 
   function createYAxes() {

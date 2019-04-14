@@ -126,8 +126,13 @@ function createDoubleYLineChart(chartRootElement, data) {
 
   on(d, 'click', event => {
     if (!chartRootElement.contains(event.target)) {
-      selectedXIndex = -1
-      displaySelectedPoint()
+      let newIndex = -1
+
+      if (newIndex !== selectedXIndex) {
+        selectedXIndex = newIndex
+
+        displaySelectedPoint()
+      }
     }
   })
 
@@ -399,14 +404,6 @@ function createDoubleYLineChart(chartRootElement, data) {
 
   function eachColumn(columns, callback) {
     columns.forEach(column => callback(column.data, column.name, column))
-  }
-
-  function getMax(data) {
-    return Math.max(...data)
-  }
-
-  function getMin(data) {
-    return Math.min(...data)
   }
 
   function createDoubleYAxes() {

@@ -448,10 +448,6 @@ function createBarStackedChart(chartRootElement, data) {
     columns.forEach(column => callback(column.data, column.name))
   }
 
-  function getMax(data) {
-    return Math.max(...data)
-  }
-
   function createYAxes() {
     let yAxesGroupShown = svgEl('g', {}, 'y-axes', 'text')
     let yAxesGroupHidden = svgEl('g', {}, 'y-axes', 'text', 'hidden');

@@ -104,8 +104,13 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
 
   on(d, 'click', event => {
     if (!chartRootElement.contains(event.target)) {
-      selectedXIndex = -1
-      displaySelectedPoint()
+      let newIndex = -1
+
+      if (newIndex !== selectedXIndex) {
+        selectedXIndex = newIndex
+
+        displaySelectedPoint()
+      }
     }
   })
 
