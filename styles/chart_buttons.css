@@ -5,6 +5,7 @@
 }
 
 .buttons > button {
+    overflow: hidden;
     padding: 0 6px;
     margin-left: 10px;
     margin-bottom: 10px;
@@ -22,9 +23,9 @@
 .buttons > button > div {
     position: absolute;
     left: 0;
+    right: 0;
     top: 0;
-    height: 100%;
-    width: 100%;
+    bottom: 0;
     border-radius: 25px;
     transform: translateZ(0);
     transition: opacity 250ms;
@@ -42,6 +43,7 @@
 
 .buttons > button > span {
     margin: 0 5px;
+    min-height: 28px;
     line-height: 28px;
     pointer-events: none;
     position: relative;
