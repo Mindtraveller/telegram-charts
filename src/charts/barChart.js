@@ -51,7 +51,8 @@ function createBarChart(chartRootElement, data) {
   let newPreviewYMax = calculatePreviewYMax(columnsToShow)
 
   let zoom = calculateZoom(start, end)
-  let xLabels = buildXLabels(zoom)
+  let allXLabels = buildXLabels(zoom)
+  let xLabels = allXLabels[zoom]
 
   let yAxesUpdateTimeout = null
 
@@ -63,7 +64,7 @@ function createBarChart(chartRootElement, data) {
     let newZoom = calculateZoom(newStart, newEnd)
 
     if (newZoom !== zoom) {
-      xLabels = buildXLabels(newZoom)
+      xLabels = allXLabels[newZoom]
       animateXLabels(zoom, newZoom, start, newStart, end, newEnd)
       zoom = newZoom
     }
@@ -289,10 +290,15 @@ function createBarChart(chartRootElement, data) {
   }
 
   function buildXLabels(zoom) {
-    let labels = []
-    let step = getXLabelsStep(zoom)
-    for (let i = 0; i < x.length; i += step) {
-      labels.push(toXLabel(x[i]))
+    let labels = {}
+    while (zoom >= 0) {
+      let zoomLabels = []
+      let step = getXLabelsStep(zoom)
+      for (let i = 0; i < x.length; i += step) {
+        zoomLabels.push(toXLabel(x[i]))
+      }
+      labels[zoom] = zoomLabels
+      zoom --
     }
     return labels
   }
