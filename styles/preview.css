@@ -38,6 +38,7 @@
 }
 
 .slider {
+    touch-action: none;
     position: relative;
     flex-grow: 1;
     border-top: 1px solid #C0D1E1;
@@ -45,6 +46,7 @@
 }
 
 .slider__bar {
+    touch-action: none;
     position: relative;
     width: 10px;
     height: 100%;
