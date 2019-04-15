@@ -33,7 +33,7 @@ function drawBars(canvas, x, y, color, width, alpha = 1) {
   for (let i = x.length - 1; i >= 0; i--) {
     let _y = Math.round(y[i])
     canvas.context.lineTo(x[i] + width, _y);
-    canvas.context.lineTo(x[i], _y);
+    canvas.context.lineTo(x[i - 1] ? x[i - 1] + width : x[i], _y);
   }
   canvas.context.fill()
 }
@@ -56,8 +56,15 @@ function drawStackedBars(canvas, x, y, color, width, alpha = 1) {
   width = Math.ceil(width)
   canvas.context.fillStyle = color
   canvas.context.globalAlpha = alpha
-  for (let i = 0; i < x.length; i++) {
-    canvas.context.rect(x[i], y[i * 2], width, y[i * 2 + 1]);
+  canvas.context.moveTo(x[0], y[0])
+  canvas.context.lineTo(x[0] + width, y[0])
+  for (let i = 1; i < x.length; i++) {
+    canvas.context.lineTo(x[i - 1] ? x[i - 1] + width : x[i], y[i * 2]);
+    canvas.context.lineTo(x[i] + width, y[i * 2]);
+  }
+  for (let i = x.length - 1; i >= 0; i--) {
+    canvas.context.lineTo(x[i] + width, y[i*2] + y[i * 2 + 1]);
+    canvas.context.lineTo(x[i - 1] ? x[i - 1] + width : x[i], y[i*2] + y[i * 2 + 1]);
   }
   canvas.context.fill()
 }

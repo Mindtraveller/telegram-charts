@@ -27,7 +27,6 @@
     top: 0;
     bottom: 0;
     border-radius: 25px;
-    transform: translateZ(0);
     transition: opacity 250ms;
     pointer-events: none;
     z-index: 1;
