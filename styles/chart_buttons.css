@@ -2,12 +2,13 @@
 .buttons > button {
     display: flex;
     flex-wrap: wrap;
+    padding: 15px 15px 0 10px;
 }
 
 .buttons > button {
     overflow: hidden;
     padding: 2px 6px;
-    margin-left: 10px;
+    margin-left: 5px;
     margin-bottom: 10px;
     font-size: 16px;
     border: solid 2px;

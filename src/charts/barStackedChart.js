@@ -2,7 +2,7 @@ function createBarStackedChart(chartRootElement, data) {
   let MAX_CHART_WIDTH = 400
   let CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth)
   let CHART_HEIGHT = 350
-  let PREVIEW_WIDTH = CHART_WIDTH - 20
+  let PREVIEW_WIDTH = CHART_WIDTH - 30
   let PREVIEW_HEIGHT = 50
   let ANIMATION_TIME = 150
   let DESELECTED_ALPHA = 0.5
@@ -172,7 +172,7 @@ function createBarStackedChart(chartRootElement, data) {
     normalizedAxes.reverse().forEach((y, i) => {
       let text = elements[i]
       text.textContent = formatAxisValue(axes[axes.length - i - 1])
-      svgAttrs(text, { x: 5, y: CHART_HEIGHT - y - 5 /** place text a bit above the line */ })
+      svgAttrs(text, { x: 15, y: CHART_HEIGHT - y - 5 /** place text a bit above the line */ })
     })
 
     removeClass(yAxesGroupHidden, 'm-down', 'm-up')
@@ -500,7 +500,7 @@ function createBarStackedChart(chartRootElement, data) {
     let step = Math.ceil(CHART_HEIGHT / NUMBER_Y_AXES)
     for (let i = 0; i < NUMBER_Y_AXES; i++) {
       let y = CHART_HEIGHT - step * i
-      let line = createAxisLine(10, CHART_WIDTH - 10, y, y)
+      let line = createAxisLine(15, CHART_WIDTH - 15, y, y)
       add(lineGroup, line)
     }
 

@@ -2,7 +2,7 @@ function createDoubleYLineChart(chartRootElement, data) {
   let MAX_CHART_WIDTH = 400
   let CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth) // same width for preview as well
   let CHART_HEIGHT = 350
-  let PREVIEW_WIDTH = CHART_WIDTH - 20
+  let PREVIEW_WIDTH = CHART_WIDTH - 30
   let PREVIEW_HEIGHT = 50
   let CHART_LINE_WEIGHT = 2
   let PREVIEW_LINE_WEIGHT = 1
@@ -176,7 +176,7 @@ function createDoubleYLineChart(chartRootElement, data) {
         let text = isRight ? rightElements[i] : leftElements[i]
         text.textContent = formatAxisValue(axes[axes.length - i - 1])
         svgAttrs(text, {
-          x: isRight ? CHART_WIDTH - ((text.textContent.length + 1) * 7) : 5,
+          x: isRight ? CHART_WIDTH - ((text.textContent.length + 1) * 8) : 15,
           y: CHART_HEIGHT - y - 5 /** place text a bit above the line */
         })
       })
@@ -440,7 +440,7 @@ function createDoubleYLineChart(chartRootElement, data) {
 
     let step = Math.ceil(CHART_HEIGHT / NUMBER_Y_AXES)
     for (let i = 0; i < NUMBER_Y_AXES; i++) {
-      let line = createAxisLine(10, CHART_WIDTH - 10, CHART_HEIGHT - step * i, CHART_HEIGHT - step * i)
+      let line = createAxisLine(15, CHART_WIDTH - 15, CHART_HEIGHT - step * i, CHART_HEIGHT - step * i)
       add(lineGroup, line)
     }
 

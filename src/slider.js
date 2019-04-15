@@ -1,5 +1,6 @@
 function createSlider(x, containerElement) {
-    let MIN_WIDTH = 50;
+    let INITIAL_WIDTH = 45;
+    let MIN_WIDTH = 20;
 
     let { slider, leftBar, rightBar } = createSlider();
     let leftShadow = el('div', 'shadow', 'left');
@@ -19,7 +20,7 @@ function createSlider(x, containerElement) {
 
     requestAnimationFrame(() => {
         TOTAL_WIDTH = slider.parentElement.getBoundingClientRect().width;
-        NEXT_LEFT_BORDER = TOTAL_WIDTH - MIN_WIDTH;
+        NEXT_LEFT_BORDER = TOTAL_WIDTH - INITIAL_WIDTH;
         moveRightBorder(NEXT_RIGHT_BORDER);
         moveLeftBorder(NEXT_LEFT_BORDER);
         persistBorders();
