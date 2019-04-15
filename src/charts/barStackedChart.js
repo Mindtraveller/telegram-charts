@@ -317,7 +317,7 @@ function createBarStackedChart(chartRootElement, data) {
         lines[a.name] = true
         return !result
       })
-      .sort((a, b) => a.name > b.name ? 1 : a.name === b.name ? 0 : -1)
+      .sort((a, b) => a.name > b.name ? -1 : a.name === b.name ? 0 : 1)
 
     scheduleAnimation(progress => {
       clearCanvas(chart)
@@ -328,7 +328,7 @@ function createBarStackedChart(chartRootElement, data) {
         let line = chartData.lines[name]
         let toBeAdded = !oldColumns.find(column => column.name === name)
         let toBeRemoved = !visibilityMap[name]
-        let prevColumn = columnsToUse[c - 1]
+        let prevColumn = columnsToUse[c + 1]
 
         let dataPart = []
 
