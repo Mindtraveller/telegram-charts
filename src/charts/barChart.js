@@ -266,7 +266,7 @@ function createBarChart(chartRootElement, data) {
         getLineColor(lines.color),
         [((xCoordinates[selectedXIndex - start - 1]) + Math.ceil(width)) || 0],
         [normalized[selectedXIndex - start]],
-        xCoordinates[selectedXIndex - start + 1] - ((xCoordinates[selectedXIndex - start - 1] + Math.ceil(width)) || 0)
+        Math.max(xCoordinates[selectedXIndex - start + 1] - ((xCoordinates[selectedXIndex - start - 1] + Math.ceil(width)) || 0), width)
       )
       return
     }

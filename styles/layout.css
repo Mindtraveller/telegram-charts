@@ -37,9 +37,9 @@ button {
 
 .dark .point-info {
     color: white;
-    -webkit-box-shadow: 0 0 2px 1px #202b39;
-    -moz-box-shadow: 0 0 2px 1px #202b39;
-    box-shadow: 0 0 2px 1px #202b39;
+    -webkit-box-shadow: 0 0 4px 1px #202b39;
+    -moz-box-shadow: 0 0 4px 1px #202b39;
+    box-shadow: 0 0 4px 1px #202b39;
 }
 
 .layout-container {
@@ -63,10 +63,6 @@ button {
     .charts-container > .chart-wrapper {
         margin: 0 20px 30px;
     }
-}
-
-.buttons {
-    /* margin-top: 10px; */
 }
 
 .mode-switcher > button {

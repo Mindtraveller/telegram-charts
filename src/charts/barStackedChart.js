@@ -437,7 +437,7 @@ function createBarStackedChart(chartRootElement, data) {
         getLineColor(lines.color),
         [((localXCoordinates[selectedXIndex - start - 1]) + Math.ceil(width)) || 0],
         [normalized[selectedXIndex * 2 - start * 2], normalized[selectedXIndex * 2 - start * 2 + 1]],
-        localXCoordinates[selectedXIndex - start + 1] - ((localXCoordinates[selectedXIndex - start - 1] + Math.ceil(width)) || 0)
+        Math.max(localXCoordinates[selectedXIndex - start + 1] - ((localXCoordinates[selectedXIndex - start - 1] + Math.ceil(width)) || 0), width)
       )
       return
     }
