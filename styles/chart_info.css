@@ -21,7 +21,7 @@
 .selected-range > .range-to {
     transform: translateZ(0);
     display: inline-block;
-    animation-duration: .25s;
+    animation-duration: .2s;
 }
 
 .dark .chart-info > h1,

@@ -431,9 +431,9 @@ function createBarStackedChart(chartRootElement, data) {
       drawChartLine(getLineColor(lines.color), localXCoordinates.slice(selectedXIndex - start + 1), normalized.slice(selectedXIndex * 2 - start * 2 + 2), width, DESELECTED_ALPHA)
       drawChartLine(
         getLineColor(lines.color),
-        [localXCoordinates[selectedXIndex - start]],
+        [((localXCoordinates[selectedXIndex - start - 1]) + Math.ceil(width)) || 0],
         [normalized[selectedXIndex * 2 - start * 2], normalized[selectedXIndex * 2 - start * 2 + 1]],
-        width
+        localXCoordinates[selectedXIndex - start + 1] - ((localXCoordinates[selectedXIndex - start - 1] + Math.ceil(width)) || 0)
       )
       return
     }

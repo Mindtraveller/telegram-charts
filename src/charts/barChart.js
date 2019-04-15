@@ -262,7 +262,12 @@ function createBarChart(chartRootElement, data) {
     if (selectedXIndex >= start && selectedXIndex <= end) {
       drawChartLine(getLineColor(lines.color), xCoordinates.slice(0, selectedXIndex - start), normalized.slice(0, selectedXIndex - start), width, DESELECTED_ALPHA)
       drawChartLine(getLineColor(lines.color), xCoordinates.slice(selectedXIndex - start + 1), normalized.slice(selectedXIndex - start + 1), width, DESELECTED_ALPHA)
-      drawChartLine(getLineColor(lines.color), [xCoordinates[selectedXIndex - start]], [normalized[selectedXIndex - start]], width)
+      drawChartLine(
+        getLineColor(lines.color),
+        [((xCoordinates[selectedXIndex - start - 1]) + Math.ceil(width)) || 0],
+        [normalized[selectedXIndex - start]],
+        xCoordinates[selectedXIndex - start + 1] - ((xCoordinates[selectedXIndex - start - 1] + Math.ceil(width)) || 0)
+      )
       return
     }
 

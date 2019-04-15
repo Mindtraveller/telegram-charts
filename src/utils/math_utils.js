@@ -2,7 +2,7 @@ function normalizeX(data, points) {
   let min = data[0]
   let max = data[data.length - 1]
   let delta = Math.abs(max - min)
-  return data.map(item => Math.ceil(points * (item - min) / delta))
+  return data.map(item => Math.round(points * (item - min) / delta))
 }
 
 function customNormalize(data, max, points, padding = 0, min = 0) {
