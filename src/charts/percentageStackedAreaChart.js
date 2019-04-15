@@ -345,13 +345,6 @@ function createPercentageStackedAreaChart(chartRootElement, data) {
     return normalizeX(x.slice(start, end + 1), CHART_WIDTH)
   }
 
-  function normalizeX(data, points) {
-    let min = data[0]
-    let max = data[data.length - 1]
-    let delta = Math.abs(max - min)
-    return data.map(item => points * (item - min) / delta)
-  }
-
   function drawChartLine(line, x, y) {
     drawStackedArea(chart, x, y, getLineColor(line.color))
   }

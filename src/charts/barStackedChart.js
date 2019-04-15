@@ -192,7 +192,7 @@ function createBarStackedChart(chartRootElement, data) {
     }, 0)
   }
 
-  function displayXAxes() {
+  function  displayXAxes() {
     clearChildren(xAxes)
 
     let step = getXLabelsStep(zoom)
@@ -439,13 +439,6 @@ function createBarStackedChart(chartRootElement, data) {
     return normalizeX(x.slice(start, end + 1), CHART_WIDTH)
   }
 
-  function normalizeX(data, points) {
-    let min = data[0]
-    let max = data[data.length - 1]
-    let delta = Math.abs(max - min)
-    return data.map(item => points * (item - min) / delta)
-  }
-
   function drawChartLine(color, x, y, width, alpha) {
     drawStackedBars(chart, x, y, color, width, alpha)
   }
@@ -522,7 +515,7 @@ function createBarStackedChart(chartRootElement, data) {
   }
 
   function createSVGText(text, x, y) {
-    let t = svgEl('text', { x, y, 'font-size': 13 })
+    let t = svgEl('text', { x, y })
     t.textContent = text
     return t
   }

@@ -23,9 +23,11 @@ function drawLine(canvas, x, y, color, alpha = 1, width = 1) {
   canvas.context.stroke()
 }
 
-function drawBars(canvas, x, y, color, width) {
+function drawBars(canvas, x, y, color, width, alpha = 1) {
   canvas.context.beginPath()
+  width = Math.ceil(width)
   canvas.context.fillStyle = color
+  canvas.context.globalAlpha = alpha
   canvas.context.moveTo(x[0], 0)
   canvas.context.lineTo(x[x.length - 1] + width, 0)
   for (let i = x.length - 1; i >= 0; i--) {

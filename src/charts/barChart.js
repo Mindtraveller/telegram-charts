@@ -5,6 +5,8 @@ function createBarChart(chartRootElement, data) {
   let PREVIEW_WIDTH = CHART_WIDTH - 20
   let PREVIEW_HEIGHT = 50
 
+  let DESELECTED_ALPHA = 0.5
+
   let ANIMATION_TIME = 250
 
   let X_AXIS_PADDING = 20
@@ -252,28 +254,21 @@ function createBarChart(chartRootElement, data) {
     }
 
     if (selectedXIndex >= start && selectedXIndex <= end) {
-      drawChartLine('#8cbef5', xCoordinates.slice(0, selectedXIndex - start), normalized.slice(0, selectedXIndex - start), width)
-      drawChartLine('#8cbef5', xCoordinates.slice(selectedXIndex - start + 1), normalized.slice(selectedXIndex - start + 1), width)
-      drawChartLine('#558DED', [xCoordinates[selectedXIndex - start]], [normalized[selectedXIndex - start]], width)
+      drawChartLine(getLineColor(lines.color), xCoordinates.slice(0, selectedXIndex - start), normalized.slice(0, selectedXIndex - start), width, DESELECTED_ALPHA)
+      drawChartLine(getLineColor(lines.color), xCoordinates.slice(selectedXIndex - start + 1), normalized.slice(selectedXIndex - start + 1), width, DESELECTED_ALPHA)
+      drawChartLine(getLineColor(lines.color), [xCoordinates[selectedXIndex - start]], [normalized[selectedXIndex - start]], width)
       return
     }
 
-    drawChartLine('#8cbef5', xCoordinates, normalized, width)
+    drawChartLine(getLineColor(lines.color), xCoordinates, normalized, width, DESELECTED_ALPHA)
   }
 
   function buildXCoordinates() {
     return normalizeX(x.slice(start, end + 1), CHART_WIDTH)
   }
 
-  function normalizeX(data, points) {
-    let min = data[0]
-    let max = data[data.length - 1]
-    let delta = Math.abs(max - min)
-    return data.map(item => points * (item - min) / delta)
-  }
-
-  function drawChartLine(color, x, y, width) {
-    drawBars(chart, x, y, color, width)
+  function drawChartLine(color, x, y, width, alpha) {
+    drawBars(chart, x, y, color, width, alpha)
   }
 
   function drawPreviewLine(line, x, y) {
@@ -298,7 +293,7 @@ function createBarChart(chartRootElement, data) {
         zoomLabels.push(toXLabel(x[i]))
       }
       labels[zoom] = zoomLabels
-      zoom --
+      zoom--
     }
     return labels
   }
