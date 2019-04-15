@@ -33,7 +33,7 @@ function createBarStackedChart(chartRootElement, data) {
 
   let chartContainer = el('div', 'charts')
 
-  add(chartContainer, chart, chartSVG, previewContainer, selectedPointInfo)
+  add(chartContainer, chart.canvas, chartSVG, previewContainer, selectedPointInfo)
   add(chartSVG, createYLines(), yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden)
 
   add(chartRootElement, chartContainer, buttons)
@@ -311,7 +311,7 @@ function createBarStackedChart(chartRootElement, data) {
         lines[a.name] = true
         return !result
       })
-      .sort((a, b) => a.name > b.name ? -1 : a.name === b.name ? 0 : 1)
+      .sort((a, b) => a.name > b.name ? 1 : a.name === b.name ? 0 : -1)
 
     scheduleAnimation(progress => {
       clearCanvas(chart)
@@ -322,7 +322,7 @@ function createBarStackedChart(chartRootElement, data) {
         let line = chartData.lines[name]
         let toBeAdded = !oldColumns.find(column => column.name === name)
         let toBeRemoved = !visibilityMap[name]
-        let prevColumn = columnsToUse[c + 1]
+        let prevColumn = columnsToUse[c - 1]
 
         let dataPart = []
 
@@ -534,7 +534,7 @@ function createBarStackedChart(chartRootElement, data) {
   function createPreview() {
     let container = el('div', 'preview-container')
     let chart = createCanvas(PREVIEW_WIDTH, PREVIEW_HEIGHT)
-    add(container, chart, createSlider(x, chartRootElement))
+    add(container, chart.canvas, createSlider(x, chartRootElement))
     return { previewContainer: container, preview: chart }
   }
 }

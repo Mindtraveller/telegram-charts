@@ -36,7 +36,7 @@ function createLineChart(chartRootElement, data) {
   addClass(selectedLine, 'y-axes', 'lines')
   let chartContainer = el('div', 'charts')
 
-  add(chartContainer, chart, chartSVG, previewContainer, selectedPointInfo)
+  add(chartContainer, chart.canvas, chartSVG, previewContainer, selectedPointInfo)
   add(chartSVG, selectedLine, createYLines(), yAxesGroupShown, yAxesGroupHidden, xAxes, xAxesHidden)
 
   add(chartRootElement, chartContainer, buttons)
@@ -470,7 +470,7 @@ function createLineChart(chartRootElement, data) {
   function createPreview() {
     let container = el('div', 'preview-container')
     let chart = createCanvas(PREVIEW_WIDTH, PREVIEW_HEIGHT)
-    add(container, chart, createSlider(x, chartRootElement))
+    add(container, chart.canvas, createSlider(x, chartRootElement))
     return { previewContainer: container, preview: chart }
   }
 }
