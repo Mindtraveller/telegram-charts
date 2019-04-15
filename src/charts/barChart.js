@@ -172,12 +172,14 @@ function createBarChart(chartRootElement, data) {
     if ((start + firstLabelCoordinateIndex) % (step * 2) !== 0) {
       let firstLabelX = (start + firstLabelCoordinateIndex - step) / (step * 2)
       let xCoordinate = CHART_WIDTH * (x[firstLabelX] - x[start]) / (x[end] - x[start])
-      let label = createSVGText(xLabels[firstLabelX], xCoordinate, CHART_HEIGHT + X_AXIS_PADDING - 5)
+      let label = xLabels[firstLabelX]
+      svgAttrs(label, { x: xCoordinate })
       add(xAxes, label)
     }
 
     for (let i = firstLabelCoordinateIndex; i < xCoordinates.length - 1; i += step) {
-      let label = createSVGText(xLabels[(start + i) / step], xCoordinates[i], CHART_HEIGHT + X_AXIS_PADDING - 5)
+      let label = xLabels[(start + i) / step]
+      svgAttrs(label, { x: xCoordinates[i] })
       add(xAxes, label)
     }
   }
@@ -294,7 +296,7 @@ function createBarChart(chartRootElement, data) {
       let zoomLabels = []
       let step = getXLabelsStep(zoom)
       for (let i = 0; i < x.length; i += step) {
-        zoomLabels.push(toXLabel(x[i]))
+        zoomLabels.push(createSVGText(toXLabel(x[i]), 0, CHART_HEIGHT + X_AXIS_PADDING - 5))
       }
       labels[zoom] = zoomLabels
       zoom--
