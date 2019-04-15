@@ -20,16 +20,9 @@
     transform: translateZ(0);
     display: inline-block;
     animation-duration: .25s;
-    transition: transform .25s;
 }
 
 .dark .chart-info > h1,
 .dark .chart-info > .selected-range {
     color: white;
-}
-
-@keyframes time-change {
-    50% {
-        transform: translateX(-2px);
-    }
 }

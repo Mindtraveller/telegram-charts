@@ -277,11 +277,15 @@ function createDoubleYLineChart(chartRootElement, data) {
       animate.beginElement()
 
       pointChartValues[lineName].value.style.color = getTooltipColor(chartData.colors[lineName])
-      pointChartValues[lineName].value.innerText = formatPointValue(data[selectedXIndex])
+      let text = formatPointValue(data[selectedXIndex])
+      if (pointChartValues[lineName].value.textContent !== text) {
+        pointChartValues[lineName].value.textContent = text
+        applyAnimation(pointChartValues[lineName].value, 'date-change')
+      }
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
-    pointDate.innerText = new Date(xValue).toString().slice(0, 15)
+    setSelectedPointDate(xValue, pointDate)
       let fromRight = xCoordinate > CHART_WIDTH / 2
       selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 200 : xCoordinate + 20) + 'px)'
       selectedPointInfo.style.display = 'block'

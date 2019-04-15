@@ -248,12 +248,16 @@ function createBarStackedChart(chartRootElement, data) {
     eachColumn(chartData.columns, (data, lineName) => {
       total += visibilityMap[lineName] ? data[selectedXIndex] : 0
       pointChartValues[lineName].value.style.color = getTooltipColor(chartData.colors[lineName])
-      pointChartValues[lineName].value.textContent = formatPointValue(data[selectedXIndex])
+      let text = formatPointValue(data[selectedXIndex])
+      if (pointChartValues[lineName].value.textContent !== text) {
+        pointChartValues[lineName].value.textContent = text
+        applyAnimation(pointChartValues[lineName].value, 'date-change')
+      }
       pointChartValues[lineName].value.parentElement.style.display = visibilityMap[lineName] ? 'flex' : 'none'
     })
 
+    setSelectedPointDate(xValue, pointDate)
     pointTotal.value.textContent = formatPointValue(total)
-    pointDate.textContent = new Date(xValue).toString().slice(0, 15)
     let fromRight = xCoordinate > CHART_WIDTH / 2
     selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 200 : xCoordinate + 20) + 'px)'
     selectedPointInfo.style.display = 'block'

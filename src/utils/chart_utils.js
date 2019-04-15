@@ -66,6 +66,11 @@ function createSelectedPointInfo(chartData, hasTotal) {
   let info = el('div', 'point-info')
   let chartInfoContainer = el('div', 'charts-info')
   let date = el('div')
+  let dOW = el('div')
+  let month = el('div')
+  let day = el('div')
+  let year = el('div')
+  add(date, dOW, t(','), day, month, year)
   add(info, date, chartInfoContainer)
 
   let chartValues = Object.entries(chartData.names).reduce((acc, [chart, chartName]) => {
@@ -91,7 +96,7 @@ function createSelectedPointInfo(chartData, hasTotal) {
     add(chartInfoContainer, div)
   }
 
-  return { selectedPointInfo: info, pointChartValues: chartValues, pointDate: date, total: { value } }
+  return { selectedPointInfo: info, pointChartValues: chartValues, pointDate: { dOW, month, day, year }, total: { value } }
 }
 
 function createAxisLine(x1, x2, y1, y2) {
@@ -102,4 +107,35 @@ let xLabelDateFormat = new Intl.DateTimeFormat('en-US', { day: 'numeric', month:
 
 function toXLabel(timestamp) {
   return xLabelDateFormat.format(new Date(timestamp))
+}
+
+let selectedPointDateFormat = new Intl.DateTimeFormat('en-GB', { month: 'short', weekday: 'short' })
+
+function formatSelectedPointData(timestamp) {
+  let date = new Date(timestamp)
+  let formattedDate = selectedPointDateFormat.format(date)
+  return { month: formattedDate.slice(-4, -1), year: date.getFullYear(), day: date.getDate(), dOW: formattedDate.slice(0, 3) }
+}
+
+function setSelectedPointDate(xValue, pointDate) {
+  let date = formatSelectedPointData(xValue)
+  if (date.year !== +pointDate.year.textContent) {
+    pointDate.year.textContent = date.year
+    applyAnimation(pointDate.year, 'date-change')
+  }
+
+  if (date.month !== pointDate.month.textContent) {
+    pointDate.month.textContent = date.month
+    applyAnimation(pointDate.month, 'date-change')
+  }
+
+  if (date.day !== +pointDate.day.textContent) {
+    pointDate.day.textContent = date.day
+    applyAnimation(pointDate.day, 'date-change')
+  }
+
+  if (date.dOW !== pointDate.dOW.textContent) {
+    pointDate.dOW.textContent = date.dOW
+    applyAnimation(pointDate.dOW, 'date-change')
+  }
 }

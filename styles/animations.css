@@ -1,0 +1,10 @@
+@keyframes date-change {
+    0% {
+        transform-origin: top;
+        transform: scaleY(0.1);
+    }
+    100% {
+        transform-origin: top;
+        transform: scaleY(1);
+    }
+}

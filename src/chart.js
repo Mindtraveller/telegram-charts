@@ -48,13 +48,13 @@ function createChart(data, index) {
         if (newStart !== prevStart) {
           prevStart = newStart
           from.textContent = formatDate(x[prevStart])
-          applyAnimation(from, 'time-change')
+          applyAnimation(from, 'date-change')
         }
 
         if (newEnd !== prevEnd) {
           prevEnd = newEnd
           to.textContent = formatDate(x[prevEnd])
-          applyAnimation(to, 'time-change')
+          applyAnimation(to, 'date-change')
         }
       }, ANIMATION_TIME)
     }

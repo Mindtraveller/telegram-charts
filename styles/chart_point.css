@@ -18,6 +18,17 @@
 
 .point-info > div:first-child {
     font-weight: bold;
+    display: flex;
+}
+
+.point-info > div:first-child > div {
+    margin-left: 4px;
+    transform: translateZ(0);
+    animation-duration: .25s;
+}
+
+.point-info > div:first-child > div:first-child {
+    margin-left: 0px;
 }
 
 .charts-info {
@@ -48,4 +59,6 @@
 
 .info > span {
     font-weight: bold;
+    transform: translateZ(0);
+    animation-duration: .25s;
 }
