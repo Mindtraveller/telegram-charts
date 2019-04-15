@@ -1,5 +1,5 @@
 function createLineChart(chartRootElement, data) {
-  let MAX_CHART_WIDTH = 400
+  let MAX_CHART_WIDTH = 450
   let CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth) // same width for preview as well
   let CHART_HEIGHT = 350
   let PREVIEW_WIDTH = CHART_WIDTH - 30

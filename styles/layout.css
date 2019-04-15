@@ -1,6 +1,6 @@
 body {
     margin: 0;
-    font-family: "Helvetica Neue", sans-serif;
+    font-family: "Helvetica", sans-serif;
 }
 
 button {
@@ -55,7 +55,7 @@ button {
 }
 
 .charts-container > .chart-wrapper {
-    max-width: 400px;
+    max-width: 450px;
     margin: 0 0 30px;
 }
 

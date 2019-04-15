@@ -1,5 +1,5 @@
 function createPercentageStackedAreaChart(chartRootElement, data) {
-  let MAX_CHART_WIDTH = 400
+  let MAX_CHART_WIDTH = 450
   let CHART_WIDTH = Math.min(MAX_CHART_WIDTH, window.innerWidth)
   let CHART_HEIGHT = 350
   let CHART_HEIGHT_GAP = 20
