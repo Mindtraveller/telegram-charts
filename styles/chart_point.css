@@ -13,6 +13,11 @@
      -webkit-box-shadow: 0px 0px 4px 1px #D2D5D7;
     -moz-box-shadow: 0px 0px 4px 1px #D2D5D7;
     box-shadow: 0px 0px 4px 1px #D2D5D7;
+
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
 }
 
 .point-info > div:first-child {

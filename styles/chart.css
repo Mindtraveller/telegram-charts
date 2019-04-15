@@ -1,6 +1,11 @@
 .charts {
     position: relative;
     overflow: hidden;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 .charts > svg {
