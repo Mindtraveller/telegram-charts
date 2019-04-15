@@ -126,7 +126,7 @@ function createBarStackedChart(chartRootElement, data) {
   })
 
   on(chartSVG, 'click', event => {
-    let step = localXCoordinates[1] / 2
+    let step = CHART_WIDTH / localXCoordinates.length
     let newIndex = start + Math.max(0, localXCoordinates.findIndex(xCoordinate => xCoordinate + step > event.offsetX))
     if (newIndex !== selectedXIndex) {
       selectedXIndex = newIndex

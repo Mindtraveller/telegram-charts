@@ -1,6 +1,6 @@
 function createSlider(x, containerElement) {
     let INITIAL_WIDTH = 45;
-    let MIN_WIDTH = 20;
+    let MIN_WIDTH = 30;
 
     let { slider, leftBar, rightBar } = createSlider();
     let leftShadow = el('div', 'shadow', 'left');

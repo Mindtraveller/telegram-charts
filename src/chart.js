@@ -1,4 +1,4 @@
-function createChart(data, index) {
+function createChart(data) {
   let chartsContainer = d.getElementById('charts-container');
   let chartRootElement = el('div', 'chart-wrapper')
 
@@ -8,7 +8,7 @@ function createChart(data, index) {
   let from = el('div', 'range-from')
   let to = el('span', 'range-to')
   add(selectedRange, from, t(' - '), to)
-  add(title, t('Chart #' + index))
+  add(title, t(data.name))
   add(info, title, selectedRange)
   add(chartRootElement, info)
 
