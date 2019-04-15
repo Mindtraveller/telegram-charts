@@ -259,7 +259,11 @@ function createBarStackedChart(chartRootElement, data) {
     })
 
     setSelectedPointDate(xValue, pointDate)
-    pointTotal.value.textContent = formatPointValue(total)
+    let totalValue = formatPointValue(total)
+    if (totalValue !== pointTotal.value.textContent) {
+      pointTotal.value.textContent = totalValue
+      applyAnimation(pointTotal.value, 'date-change')
+    }
     let fromRight = xCoordinate > CHART_WIDTH / 2
     selectedPointInfo.style.transform = 'translateX(' + (fromRight ? xCoordinate - 200 : xCoordinate + 20) + 'px)'
     selectedPointInfo.style.display = 'block'
